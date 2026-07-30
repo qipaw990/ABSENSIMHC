@@ -171,6 +171,10 @@ class SiswaController extends Controller
      */
     public function cetakBatch(int $kelas_id)
     {
+        // ── Naikkan memory limit untuk batch PDF (banyak QR code) ──
+        ini_set('memory_limit', '512M');
+        set_time_limit(120); // maksimal 2 menit
+
         $kelas     = Kelas::with('jurusan')->findOrFail($kelas_id);
         $siswaList = Siswa::where('kelas_id', $kelas_id)->orderBy('nama')->get();
 
@@ -179,16 +183,20 @@ class SiswaController extends Controller
         $qrCodes     = [];
 
         foreach ($siswaList as $siswa) {
-            // QR 180px sudah cukup untuk batch — lebih kecil = lebih cepat
-            $qrSvg = QrCode::format('svg')->size(180)->margin(0)->generate($siswa->qr_token);
+            // QR 120px = jauh lebih hemat memory, kualitas tetap cukup untuk scan
+            $qrSvg = QrCode::format('svg')->size(120)->margin(0)->generate($siswa->qr_token);
             $qrCodes[$siswa->id] = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
+
+            // Bebaskan variabel QR SVG dari memory setelah encode
+            unset($qrSvg);
         }
 
         $pdf = app('dompdf.wrapper');
         $pdf->setOptions([
-            'dpi'             => 96,
+            'dpi'             => 72,   // turunkan dari 96 → hemat memory ~40%
             'isRemoteEnabled' => false,
             'defaultFont'     => 'Arial',
+            'isHtml5ParserEnabled' => false,
         ]);
         $pdf->loadView('admin.siswa.kartu-batch-pdf',
             compact('kelas', 'siswaList', 'qrCodes', 'namaSekolah', 'logoBase64')
