@@ -293,7 +293,7 @@
                 <div class="ph-school">{{ strtoupper($namaSekolah) }}</div>
                 <div class="ph-sub">Daftar Kartu QR Absensi &mdash; {{ $kelas->nama }} ({{ $kelas->jurusan->nama ?? '' }})</div>
                 <div class="ph-meta">
-                    Tahun Ajaran: {{ \App\Models\TahunAjaran::where('is_aktif', true)->value('nama') ?? now()->format('Y') }}
+                    Tahun Ajaran: {{ $tahunAjaran }}
                     &bull; Dicetak: {{ now()->format('d F Y') }}
                     &bull; Total: {{ $siswaList->count() }} Siswa
                 </div>
@@ -378,7 +378,7 @@
                     <table class="k-footer-table">
                         <tr>
                             <td class="k-footer-left">SISTEM ABSENSI QR &bull; {{ strtoupper($namaSekolah) }}</td>
-                            <td class="k-footer-right">TA. {{ \App\Models\TahunAjaran::where('is_aktif', true)->value('nama') ?? now()->format('Y') }}</td>
+                            <td class="k-footer-right">TA. {{ $tahunAjaran }}</td>
                         </tr>
                     </table>
                 </div>
