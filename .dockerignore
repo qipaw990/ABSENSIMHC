@@ -1,0 +1,39 @@
+# File yang TIDAK perlu diupload ke server
+.env
+.env.*
+!.env.example
+
+# Git & CI
+.git/
+.github/
+.gitignore
+
+# Dependencies (akan diinstall ulang)
+node_modules/
+vendor/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Log & Cache Laravel (dibuat ulang di server)
+storage/logs/*.log
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+bootstrap/cache/*.php
+
+# Build assets (akan dibuild ulang)
+# public/build/
+
+# Test files
+tests/
+phpunit.xml
+
+# Docker development override
+docker-compose.override.yml
