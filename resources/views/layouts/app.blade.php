@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>@yield('title', 'Dashboard') — {{ config('app.nama_sekolah', 'Absensi QR SMK') }}</title>
     <meta name="description" content="Sistem Absensi QR Code SMK dengan notifikasi WhatsApp otomatis">
 
