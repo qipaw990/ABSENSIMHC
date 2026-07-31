@@ -11,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health:   '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Percayai semua proxy (Cloudflare/Nginx reverse proxy)
+        $middleware->trustProxies(at: '*');
+
         // Daftarkan alias middleware Spatie Permission
         $middleware->alias([
             'role'       => \Spatie\Permission\Middleware\RoleMiddleware::class,

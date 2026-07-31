@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
+use Illuminate\Support\Facades\URL;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -21,6 +23,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Paksa HTTPS jika diakses via HTTPS / reverse proxy / domain https
+        if (
+            request()->header('X-Forwarded-Proto') === 'https' ||
+            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+            str_starts_with(config('app.url'), 'https://') ||
+            env('FORCE_HTTPS', false)
+        ) {
+            URL::forceScheme('https');
+        }
+
         // Bahasa Indonesia untuk Carbon (tanggal/waktu)
         Carbon::setLocale('id');
 
