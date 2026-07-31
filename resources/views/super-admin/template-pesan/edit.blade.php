@@ -104,7 +104,7 @@ function insertPlaceholder(text) {
 }
 
 function loadPreview() {
-    fetch('{{ route('super-admin.template-pesan.preview', $templatePesan) }}')
+    fetch('{{ route('super-admin.template-pesan.preview', $templatePesan, false) }}')
         .then(r => r.json())
         .then(d => { document.getElementById('previewBox').textContent = d.preview; })
         .catch(() => { document.getElementById('previewBox').textContent = 'Gagal memuat preview.'; });

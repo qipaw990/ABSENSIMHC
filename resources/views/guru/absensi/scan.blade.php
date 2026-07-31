@@ -266,7 +266,7 @@ function onScanSuccess(decodedText) {
     document.getElementById('scanDot').style.background = '#f59e0b';
 
     // Kirim ke server
-    fetch('{{ route("guru.absensi.proses-scan") }}', {
+    fetch('{{ route("guru.absensi.proses-scan", [], false) }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -349,7 +349,7 @@ function refreshBelumAbsen() {
     const icon = document.getElementById('refreshIcon');
     icon.style.animation = 'spin 1s linear infinite';
 
-    fetch('{{ route("guru.absensi.belum-scan", $kelas->id) }}')
+    fetch('{{ route("guru.absensi.belum-scan", $kelas->id, false) }}')
     .then(r => r.json())
     .then(data => {
         document.getElementById('belumCount').textContent = data.count;
