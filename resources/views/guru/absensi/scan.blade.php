@@ -188,7 +188,7 @@
                     <i class="bi bi-pencil me-1"></i>Input Manual
                 </button>
                 <div class="collapse mt-2" id="manualForm">
-                    <form action="/guru/absensi/manual" method="POST">
+                    <form action="{{ route('guru.absensi.manual') }}" method="POST">
                         @csrf
                         <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
                         <input type="hidden" name="tanggal" value="{{ today()->toDateString() }}">
@@ -265,7 +265,7 @@ function onScanSuccess(decodedText) {
     document.getElementById('scanStatus').textContent = 'Memproses...';
     document.getElementById('scanDot').style.background = '#f59e0b';
 
-    // Kirim ke server (pakai relative path murni untuk cegah mixed content)
+    // Kirim ke server
     fetch('/guru/absensi/proses-scan', {
         method: 'POST',
         headers: {
@@ -349,7 +349,7 @@ function refreshBelumAbsen() {
     const icon = document.getElementById('refreshIcon');
     icon.style.animation = 'spin 1s linear infinite';
 
-    fetch('/guru/absensi/belum-scan/{{ $kelas->id }}')
+    fetch('/guru/absensi/belum-scan/' + KELAS_ID)
     .then(r => r.json())
     .then(data => {
         document.getElementById('belumCount').textContent = data.count;
