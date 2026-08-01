@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\Absensi;
 use App\Models\TemplatePesan;
 use App\Models\WaLog;
-use App\Services\FonnteService;
+use App\Services\WaGatewayService;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,7 +37,7 @@ class KirimNotifikasiWA implements ShouldQueue
         private int $absensiId
     ) {}
 
-    public function handle(FonnteService $fonnteService): void
+    public function handle(WaGatewayService $waGatewayService): void
     {
         // 1. Ambil data absensi beserta relasi yang dibutuhkan
         $absensi = Absensi::with([
@@ -97,9 +97,9 @@ class KirimNotifikasiWA implements ShouldQueue
         // 6. Buat log WA dulu dengan status antrian
         $waLog = $this->catatLog($absensi, $waSender->id, $targetNomor, $pesan, 'antrian');
 
-        // 7. Kirim via Fonnte menggunakan token kelas ini (bukan global)
-        $hasil = $fonnteService->kirim(
-            $waSender->token_fonnte, // sudah otomatis didekripsi oleh Model
+        // 7. Kirim via WhatsApp Gateway API
+        $hasil = $waGatewayService->kirim(
+            $waSender->api_key,
             $targetNomor,
             $pesan
         );
@@ -130,7 +130,7 @@ class KirimNotifikasiWA implements ShouldQueue
 
             // Retry hanya jika bukan sync driver
             if (config('queue.default') !== 'sync' && $currentAttempt < $this->tries) {
-                throw new \Exception("Fonnte API gagal: " . $hasil['response']);
+                throw new \Exception("WhatsApp Gateway API gagal: " . $hasil['response']);
             }
         }
     }

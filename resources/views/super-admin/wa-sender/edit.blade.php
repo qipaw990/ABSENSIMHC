@@ -46,16 +46,16 @@
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label">Token Fonnte Baru</label>
+                    <label class="form-label">API Key WhatsApp Gateway Baru</label>
                     <div class="input-group">
                         <input type="password" name="token_fonnte" id="tokenInput"
                             class="form-control @error('token_fonnte') is-invalid @enderror"
-                            placeholder="Kosongkan jika tidak ingin mengganti">
+                            placeholder="Kosongkan jika tidak ingin mengganti API Key">
                         <button type="button" class="btn btn-outline-secondary" onclick="toggleToken()">
                             <i class="bi bi-eye" id="eyeIcon"></i>
                         </button>
                     </div>
-                    <small style="color:#6b7280;font-size:0.72rem;">Kosongkan jika token tidak diubah</small>
+                    <small style="color:#6b7280;font-size:0.72rem;">Kosongkan jika API Key tidak diubah</small>
                     @error('token_fonnte')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 

@@ -16,9 +16,9 @@
 <!-- Info Box -->
 <div style="background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.2);border-radius:12px;padding:0.85rem 1.2rem;margin-bottom:1.5rem;font-size:0.82rem;color:#94a3b8;">
     <i class="bi bi-info-circle me-1" style="color:#25d366;"></i>
-    <strong style="color:#e2e8f0;">Multi-Sender per Kelas:</strong>
-    Setiap kelas memiliki nomor WhatsApp sendiri untuk menghindari spam detection.
-    Daftar ke <a href="https://fonnte.com" target="_blank" style="color:#25d366;">fonnte.com</a>, scan QR WhatsApp, dan salin token API-nya.
+    <strong style="color:#e2e8f0;">Multi-Sender per Kelas (Custom WhatsApp Gateway):</strong>
+    Setiap kelas terhubung ke WhatsApp Gateway resmi sekolah (<a href="https://api-gateway.smkmuthiaharapanclk.com" target="_blank" style="color:#25d366;">api-gateway.smkmuthiaharapanclk.com</a>).
+    Anda dapat mengisi API Key khusus per project atau membiarkannya menggunakan Default Global API Key dari sistem.
 </div>
 
 <div class="row g-3">
@@ -53,7 +53,7 @@
                 @endif
 
                 <div class="mb-3">
-                    <div style="font-size:0.72rem;color:#6b7280;">Token Fonnte</div>
+                    <div style="font-size:0.72rem;color:#6b7280;">API Key Gateway</div>
                     <div style="font-size:0.75rem;font-family:monospace;color:#6b7280;word-break:break-all;">
                         ••••••{{ substr($sender->token_fonnte_plain ?? '????', -6) }}
                     </div>

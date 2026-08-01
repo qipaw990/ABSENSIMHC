@@ -25,7 +25,7 @@ class WaSender extends Model
     ];
 
     /**
-     * Enkripsi token sebelum disimpan ke database.
+     * Enkripsi token/API Key sebelum disimpan ke database.
      */
     public function setTokenFonnteAttribute(string $value): void
     {
@@ -33,15 +33,37 @@ class WaSender extends Model
     }
 
     /**
-     * Dekripsi token saat dibaca dari database.
+     * Dekripsi token/API Key saat dibaca dari database.
      */
-    public function getTokenFonnteAttribute(string $value): string
+    public function getTokenFonnteAttribute(?string $value): string
     {
+        if (empty($value)) return '';
         try {
             return Crypt::decryptString($value);
         } catch (\Exception $e) {
-            return '';
+            return $value;
         }
+    }
+
+    /**
+     * Alias api_key untuk token_fonnte.
+     */
+    public function getApiKeyAttribute(): string
+    {
+        return $this->token_fonnte;
+    }
+
+    public function setApiKeyAttribute(string $value): void
+    {
+        $this->token_fonnte = $value;
+    }
+
+    /**
+     * Helper untuk mendapatkan teks plain token_fonnte.
+     */
+    public function getTokenFonntePlainAttribute(): string
+    {
+        return $this->token_fonnte;
     }
 
     public function kelas(): BelongsTo

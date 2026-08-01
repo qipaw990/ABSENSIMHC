@@ -13,7 +13,7 @@ services:
       APP_ENV: production
       APP_DEBUG: "true"
       APP_KEY: "base64:nLFw8vkkqzZtbYb+jb9NW7r3xM4PgW1TAEcgc2MFoEg="
-      APP_URL: "http://192.168.0.103:8585"
+      APP_URL: "https://absensi.smkmuthiaharapanclk.com"
       APP_TIMEZONE: Asia/Jakarta
       APP_LOCALE: id
       APP_FALLBACK_LOCALE: id

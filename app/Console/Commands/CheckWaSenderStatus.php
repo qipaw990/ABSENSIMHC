@@ -3,15 +3,15 @@
 namespace App\Console\Commands;
 
 use App\Models\WaSender;
-use App\Services\FonnteService;
+use App\Services\WaGatewayService;
 use Illuminate\Console\Command;
 
 class CheckWaSenderStatus extends Command
 {
     protected $signature   = 'wa:check-sender-status';
-    protected $description = 'Cek status/kesehatan semua device WA Fonnte per kelas';
+    protected $description = 'Cek status/kesehatan semua device WA Gateway per kelas';
 
-    public function handle(FonnteService $fonnteService): int
+    public function handle(WaGatewayService $waGatewayService): int
     {
         $senders = WaSender::with('kelas')->get();
 
@@ -20,12 +20,12 @@ class CheckWaSenderStatus extends Command
             return Command::SUCCESS;
         }
 
-        $this->info("📡 Memeriksa {$senders->count()} WA Sender...");
+        $this->info("📡 Memeriksa {$senders->count()} WA Sender via WhatsApp Gateway...");
         $this->newLine();
 
         $table = [];
         foreach ($senders as $sender) {
-            $statusBaru = $fonnteService->cekStatus($sender->token_fonnte);
+            $statusBaru = $waGatewayService->cekStatus($sender->api_key);
             $sender->update([
                 'status'        => $statusBaru,
                 'last_check_at' => now(),

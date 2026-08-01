@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 class AbsensiService
 {
     public function __construct(
-        private FonnteService $fonnteService
+        private WaGatewayService $waGatewayService
     ) {}
 
     /**
@@ -278,9 +278,9 @@ class AbsensiService
                 ]);
             }
 
-            // Kirim via Fonnte API (synchronous)
-            $hasil = $this->fonnteService->kirim(
-                $waSender->token_fonnte,
+            // Kirim via WhatsApp Gateway API (synchronous)
+            $hasil = $this->waGatewayService->kirim(
+                $waSender->api_key,
                 $targetNomor,
                 $pesan
             );

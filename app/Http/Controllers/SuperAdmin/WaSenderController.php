@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\WaLog;
 use App\Models\WaSender;
-use App\Services\FonnteService;
+use App\Services\WaGatewayService;
 use Illuminate\Http\Request;
 
 class WaSenderController extends Controller
 {
-    public function __construct(private FonnteService $fonnteService) {}
+    public function __construct(private WaGatewayService $waGatewayService) {}
 
     public function index()
     {
@@ -33,17 +33,22 @@ class WaSenderController extends Controller
 
     public function store(Request $request)
     {
+        // Support token_fonnte or api_key from input
+        if (!$request->has('token_fonnte') && $request->has('api_key')) {
+            $request->merge(['token_fonnte' => $request->input('api_key')]);
+        }
+
         $validated = $request->validate([
             'kelas_id'    => 'required|exists:kelas,id|unique:wa_senders,kelas_id',
             'nama_device' => 'required|string|max:100',
-            'token_fonnte' => 'required|string',
+            'token_fonnte' => 'nullable|string',
             'nomor_wa'    => 'nullable|string|max:20',
         ]);
 
         $waSender = WaSender::create($validated);
 
         // Cek status langsung
-        $status = $this->fonnteService->cekStatus($waSender->token_fonnte);
+        $status = $this->waGatewayService->cekStatus($waSender->api_key);
         $waSender->update(['status' => $status, 'last_check_at' => now()]);
 
         return redirect()->route('super-admin.wa-sender.index')
@@ -68,6 +73,11 @@ class WaSenderController extends Controller
 
     public function update(Request $request, WaSender $waSender)
     {
+        // Support token_fonnte or api_key from input
+        if (!$request->has('token_fonnte') && $request->has('api_key')) {
+            $request->merge(['token_fonnte' => $request->input('api_key')]);
+        }
+
         $validated = $request->validate([
             'kelas_id'     => 'required|exists:kelas,id|unique:wa_senders,kelas_id,' . $waSender->id,
             'nama_device'  => 'required|string|max:100',
@@ -83,8 +93,8 @@ class WaSenderController extends Controller
 
         $waSender->update($validated);
 
-        // ✅ Otomatis tes koneksi & update status device via Fonnte API setelah diubah
-        $status = $this->fonnteService->cekStatus($waSender->token_fonnte);
+        // ✅ Otomatis tes koneksi & update status device via WA Gateway API setelah diubah
+        $status = $this->waGatewayService->cekStatus($waSender->api_key);
         $waSender->update([
             'status'        => $status,
             'last_check_at' => now(),
@@ -111,8 +121,8 @@ class WaSenderController extends Controller
             'pesan'        => 'required|string|max:500',
         ]);
 
-        $hasil = $this->fonnteService->kirim(
-            $waSender->token_fonnte,
+        $hasil = $this->waGatewayService->kirim(
+            $waSender->api_key,
             $request->target_nomor,
             $request->pesan
         );
@@ -142,11 +152,11 @@ class WaSenderController extends Controller
     }
 
     /**
-     * Cek status device WA sender ini via Fonnte API.
+     * Cek status device WA sender ini via WhatsApp Gateway API.
      */
     public function cekStatus(WaSender $waSender)
     {
-        $status = $this->fonnteService->cekStatus($waSender->token_fonnte);
+        $status = $this->waGatewayService->cekStatus($waSender->api_key);
         $waSender->update(['status' => $status, 'last_check_at' => now()]);
 
         $nomor = $waSender->nomor_wa ?? $waSender->nama_device;

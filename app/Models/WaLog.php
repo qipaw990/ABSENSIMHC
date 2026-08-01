@@ -35,6 +35,16 @@ class WaLog extends Model
         return $this->belongsTo(Absensi::class);
     }
 
+    public function getResponseGatewayAttribute(): ?string
+    {
+        return $this->response_fonnte;
+    }
+
+    public function setResponseGatewayAttribute(?string $value): void
+    {
+        $this->response_fonnte = $value;
+    }
+
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {

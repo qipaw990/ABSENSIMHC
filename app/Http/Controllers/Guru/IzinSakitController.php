@@ -131,8 +131,8 @@ class IzinSakitController extends Controller
                         'jam'          => '-',
                     ]);
 
-                    app(\App\Services\FonnteService::class)->kirim(
-                        $waSender->token_fonnte,
+                    app(\App\Services\WaGatewayService::class)->kirim(
+                        $waSender->api_key,
                         $siswa->no_wa_ortu_format,
                         $pesan
                     );

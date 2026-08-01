@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'base_url' => env('WA_GATEWAY_BASE_URL', 'https://api-gateway.smkmuthiaharapanclk.com'),
+        'api_key'  => env('WA_GATEWAY_API_KEY', 'wag_admin_key_changeme_12345678'),
+    ],
+
 ];
