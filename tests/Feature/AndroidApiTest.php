@@ -115,4 +115,40 @@ class AndroidApiTest extends TestCase
                 'message' => 'Berhasil logout.',
             ]);
     }
+
+    #[Test]
+    public function update_dan_delete_absensi_api()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guru');
+        $token = $user->createToken('test')->plainTextToken;
+
+        $siswa = Siswa::factory()->create();
+        $absensi = Absensi::create([
+            'siswa_id'   => $siswa->id,
+            'kelas_id'   => $siswa->kelas_id,
+            'tanggal'    => now()->toDateString(),
+            'jam_scan'   => '07:00:00',
+            'status'     => 'hadir',
+            'keterangan' => 'Hadir tepat waktu',
+        ]);
+
+        // Edit Absensi
+        $updateResp = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->putJson('/api/guru/absensi/' . $absensi->id, [
+                'status'     => 'terlambat',
+                'jam_scan'   => '07:25:00',
+                'keterangan' => 'Terlambat 15 menit',
+            ]);
+
+        $updateResp->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        // Delete Absensi
+        $deleteResp = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->deleteJson('/api/guru/absensi/' . $absensi->id);
+
+        $deleteResp->assertStatus(200)
+            ->assertJson(['success' => true]);
+    }
 }

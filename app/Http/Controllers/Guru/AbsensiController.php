@@ -189,17 +189,28 @@ class AbsensiController extends Controller
     }
 
     /**
-     * Update status absensi yang sudah ada.
+     * Update status, jam scan, dan keterangan absensi yang sudah ada.
      */
     public function update(Request $request, Absensi $absensi)
     {
         $validated = $request->validate([
             'status'     => 'required|in:hadir,terlambat,izin,sakit,alpha',
+            'jam_scan'   => 'nullable|string',
             'keterangan' => 'nullable|string|max:500',
         ]);
 
         $absensi->update($validated);
 
-        return back()->with('success', 'Status absensi berhasil diperbarui.');
+        return back()->with('success', 'Data absensi berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus record absensi.
+     */
+    public function destroy(Absensi $absensi)
+    {
+        $absensi->delete();
+
+        return back()->with('success', 'Data absensi berhasil dihapus.');
     }
 }

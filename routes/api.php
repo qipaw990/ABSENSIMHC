@@ -59,6 +59,8 @@ Route::withoutMiddleware([
             Route::post('absensi/scan',            [GuruApiController::class, 'scan']);
             Route::post('absensi/manual',          [GuruApiController::class, 'inputManual']);
             Route::get('absensi/rekap/{kelas_id}', [GuruApiController::class, 'rekap']);
+            Route::put('absensi/{id}',             [GuruApiController::class, 'updateAbsensi']);
+            Route::delete('absensi/{id}',          [GuruApiController::class, 'deleteAbsensi']);
         });
 
         // ── Siswa ──────────────────────────────────────────────────────────────

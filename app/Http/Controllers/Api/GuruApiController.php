@@ -236,4 +236,42 @@ class GuruApiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Edit / Update data absensi via API Mobile.
+     * PUT /api/guru/absensi/{id}
+     */
+    public function updateAbsensi(Request $request, int $id): JsonResponse
+    {
+        $absensi = Absensi::findOrFail($id);
+
+        $validated = $request->validate([
+            'status'     => 'required|in:hadir,terlambat,izin,sakit,alpha',
+            'jam_scan'   => 'nullable|string',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        $absensi->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data absensi berhasil diperbarui.',
+            'data'    => $absensi,
+        ]);
+    }
+
+    /**
+     * Hapus data absensi via API Mobile.
+     * DELETE /api/guru/absensi/{id}
+     */
+    public function deleteAbsensi(int $id): JsonResponse
+    {
+        $absensi = Absensi::findOrFail($id);
+        $absensi->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data absensi berhasil dihapus.',
+        ]);
+    }
 }

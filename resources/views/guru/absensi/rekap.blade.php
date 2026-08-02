@@ -15,6 +15,14 @@
     </div>
 </div>
 
+<!-- Alert Pesan -->
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <!-- Filter tanggal -->
 <div class="card mb-3">
     <div class="card-body py-3 px-4">
@@ -64,8 +72,17 @@
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table mb-0">
-                <thead><tr><th>#</th><th>Siswa</th><th>Jam Scan</th><th>Status</th><th>Keterangan</th><th>Ubah Status</th></tr></thead>
+            <table class="table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Siswa</th>
+                        <th>Jam Scan</th>
+                        <th>Status</th>
+                        <th>Keterangan</th>
+                        <th class="text-end pe-4">Aksi / Kelola</th>
+                    </tr>
+                </thead>
                 <tbody>
                     @forelse($absensiList as $abs)
                     <tr>
@@ -77,20 +94,68 @@
                         <td style="font-family:monospace;color:#94a3b8;">{{ $abs->jam_scan ?? '-' }}</td>
                         <td>{!! $abs->status_badge !!}</td>
                         <td style="font-size:0.82rem;color:#94a3b8;">{{ $abs->keterangan ?? '-' }}</td>
-                        <td>
-                            <form action="{{ route('guru.absensi.update', $abs) }}" method="POST" class="d-flex gap-1">
-                                @csrf @method('PATCH')
-                                <select name="status" class="form-select form-select-sm" style="width:auto;">
-                                    @foreach(['hadir','terlambat','izin','sakit','alpha'] as $st)
-                                    <option value="{{ $st }}" {{ $abs->status === $st ? 'selected' : '' }}>{{ ucfirst($st) }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-check-lg"></i></button>
-                            </form>
+                        <td class="text-end pe-4">
+                            <div class="d-flex gap-1 justify-content-end">
+                                <!-- Tombol Edit Modal -->
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ $abs->id }}" title="Edit Data Absensi">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+
+                                <!-- Tombol Hapus -->
+                                <form action="{{ route('guru.absensi.destroy', $abs->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data absensi {{ $abs->siswa->nama }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Data Absensi">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Modal Edit Absensi -->
+                            <div class="modal fade text-start" id="editModal{{ $abs->id }}" tabindex="-1" aria-labelledby="editModalLabel{{ $abs->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form action="{{ route('guru.absensi.update', $abs->id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editModalLabel{{ $abs->id }}">
+                                                    <i class="bi bi-pencil-square me-2 text-warning"></i>Edit Absensi — {{ $abs->siswa->nama }}
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label font-weight-semibold">Status Kehadiran</label>
+                                                    <select name="status" class="form-select">
+                                                        <option value="hadir" {{ $abs->status === 'hadir' ? 'selected' : '' }}>Hadir</option>
+                                                        <option value="terlambat" {{ $abs->status === 'terlambat' ? 'selected' : '' }}>Terlambat</option>
+                                                        <option value="izin" {{ $abs->status === 'izin' ? 'selected' : '' }}>Izin</option>
+                                                        <option value="sakit" {{ $abs->status === 'sakit' ? 'selected' : '' }}>Sakit</option>
+                                                        <option value="alpha" {{ $abs->status === 'alpha' ? 'selected' : '' }}>Alpha</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label font-weight-semibold">Jam Scan / Masuk</label>
+                                                    <input type="text" name="jam_scan" class="form-control" value="{{ $abs->jam_scan }}" placeholder="HH:MM:SS (contoh: 07:15:00)">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label font-weight-semibold">Keterangan / Catatan</label>
+                                                    <textarea name="keterangan" class="form-control" rows="3" placeholder="Tambahkan catatan jika ada">{{ $abs->keterangan }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-warning btn-sm">Simpan Perubahan</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center py-3" style="color:#6b7280;">Belum ada yang absen.</td></tr>
+                    <tr><td colspan="6" class="text-center py-4" style="color:#6b7280;">Belum ada data absensi pada tanggal ini.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -121,11 +186,12 @@
                             <input type="hidden" name="tanggal" value="{{ $tanggal->toDateString() }}">
                             <select name="status" class="form-select form-select-sm" style="width:auto;">
                                 <option value="hadir">Hadir</option>
+                                <option value="terlambat">Terlambat</option>
                                 <option value="izin">Izin</option>
                                 <option value="sakit">Sakit</option>
                                 <option value="alpha" selected>Alpha</option>
                             </select>
-                            <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-check-lg"></i></button>
+                            <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-check-lg"></i> Simpan</button>
                         </form>
                     </td>
                 </tr>

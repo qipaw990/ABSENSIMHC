@@ -100,6 +100,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('absensi/rekap/{kelas_id}', [AbsensiController::class, 'rekap'])->name('absensi.rekap');
         Route::post('absensi/manual', [AbsensiController::class, 'inputManual'])->name('absensi.manual');
         Route::patch('absensi/{absensi}', [AbsensiController::class, 'update'])->name('absensi.update');
+        Route::delete('absensi/{absensi}', [AbsensiController::class, 'destroy'])->name('absensi.destroy');
 
         // Siswa belum absen (real-time AJAX)
         Route::get('absensi/belum-scan/{kelas_id}', [AbsensiController::class, 'belumScan'])->name('absensi.belum-scan');

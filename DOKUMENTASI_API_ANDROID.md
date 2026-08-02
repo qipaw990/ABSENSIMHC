@@ -236,6 +236,44 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 
 ---
 
+### 5. Edit Data Absensi (PUT `/api/guru/absensi/{id}`)
+* **Headers**: `Authorization: Bearer <token>`
+* **Request Body**:
+  ```json
+  {
+    "status": "terlambat",
+    "jam_scan": "07:25:00",
+    "keterangan": "Terlambat 15 menit"
+  }
+  ```
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Data absensi berhasil diperbarui.",
+    "data": {
+      "id": 101,
+      "status": "terlambat",
+      "jam_scan": "07:25:00",
+      "keterangan": "Terlambat 15 menit"
+    }
+  }
+  ```
+
+---
+
+### 6. Hapus Data Absensi (DELETE `/api/guru/absensi/{id}`)
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Data absensi berhasil dihapus."
+  }
+  ```
+
+---
+
 ## 4. 🎓 MODUL SISWA (`/api/siswa`)
 
 ### 1. Profil & Display QR Code Siswa (GET `/api/siswa/profile`)
