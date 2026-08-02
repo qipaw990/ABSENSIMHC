@@ -57,7 +57,7 @@
 <div class="card">
     <div class="card-header px-4 py-3">
         <i class="bi bi-calendar3 me-2 text-primary"></i>
-        Riwayat {{ \Carbon\Carbon::create()->month($bulan)->translatedFormat('F') }} {{ $tahun }}
+        Riwayat {{ \Carbon\Carbon::create()->month((int) $bulan)->translatedFormat('F') }} {{ $tahun }}
     </div>
     <div class="card-body p-0">
         <table class="table mb-0">

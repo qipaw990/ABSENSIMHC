@@ -23,8 +23,8 @@ class RiwayatController extends Controller
             return redirect()->route('dashboard')->with('error', 'Data siswa tidak ditemukan.');
         }
 
-        $bulan = $request->bulan ?? now()->format('m');
-        $tahun = $request->tahun ?? now()->format('Y');
+        $bulan = (int) ($request->bulan ?? now()->format('m'));
+        $tahun = (int) ($request->tahun ?? now()->format('Y'));
 
         $tanggalMulai = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
         $tanggalAkhir = $tanggalMulai->copy()->endOfMonth();

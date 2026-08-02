@@ -120,6 +120,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('laporan/export-excel', [LaporanController::class, 'exportExcel'])->name('laporan.export-excel');
         Route::get('laporan/export-pdf',   [LaporanController::class, 'exportPdf'])->name('laporan.export-pdf');
         Route::get('laporan/pdf',          [LaporanController::class, 'exportPdf'])->name('laporan.pdf');
+
+        // Penilaian & Nilai Harian Siswa
+        Route::resource('penilaian', \App\Http\Controllers\Guru\PenilaianController::class);
+        Route::post('penilaian/{penilaian}/nilai-batch', [\App\Http\Controllers\Guru\PenilaianController::class, 'storeNilaiBatch'])->name('penilaian.store-nilai-batch');
     });
 
     // =====================================================

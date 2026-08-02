@@ -510,6 +510,9 @@
             <a href="{{ route('guru.laporan.index') }}" class="nav-link {{ request()->routeIs('guru.laporan.*') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart-line"></i> Laporan
             </a>
+            <a href="{{ route('guru.penilaian.index') }}" class="nav-link {{ request()->routeIs('guru.penilaian.*') ? 'active' : '' }}">
+                <i class="bi bi-journal-check"></i> Penilaian & Nilai
+            </a>
             @endhasanyrole
 
             {{-- SISWA --}}

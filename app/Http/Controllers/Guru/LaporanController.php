@@ -28,8 +28,8 @@ class LaporanController extends Controller
 
         // Filter
         $kelasId      = $request->kelas_id ?? $kelasList->first()?->id;
-        $bulan        = $request->bulan ?? now()->format('m');
-        $tahun        = $request->tahun ?? now()->format('Y');
+        $bulan        = (int) ($request->bulan ?? now()->format('m'));
+        $tahun        = (int) ($request->tahun ?? now()->format('Y'));
         $tanggalMulai = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
         $tanggalAkhir = $tanggalMulai->copy()->endOfMonth();
         $jumlahHari   = $tanggalMulai->daysInMonth;
@@ -120,8 +120,8 @@ class LaporanController extends Controller
     public function exportPdf(Request $request)
     {
         $kelasId = $request->kelas_id;
-        $bulan   = $request->bulan ?? now()->format('m');
-        $tahun   = $request->tahun ?? now()->format('Y');
+        $bulan   = (int) ($request->bulan ?? now()->format('m'));
+        $tahun   = (int) ($request->tahun ?? now()->format('Y'));
 
         $kelas        = Kelas::with('jurusan', 'waliKelas')->findOrFail($kelasId);
         $tanggalMulai = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
