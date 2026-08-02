@@ -207,10 +207,11 @@ class GuruApiController extends Controller
                 'tanggal'  => $tanggal,
             ],
             [
-                'kelas_id'   => $validated['kelas_id'],
-                'status'     => $validated['status'],
-                'jam_scan'   => now()->format('H:i:s'),
-                'keterangan' => $validated['keterangan'] ?? null,
+                'kelas_id'     => $validated['kelas_id'],
+                'status'       => $validated['status'],
+                'jam_scan'     => now()->format('H:i:s'),
+                'keterangan'   => $validated['keterangan'] ?? null,
+                'dicatat_oleh' => $request->user()?->id,
             ]
         );
 

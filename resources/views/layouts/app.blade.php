@@ -530,6 +530,9 @@
             <a href="{{ route('siswa.izin.index') }}" class="nav-link {{ request()->routeIs('siswa.izin.*') ? 'active' : '' }}">
                 <i class="bi bi-file-earmark-text"></i> Pengajuan Izin
             </a>
+            <a href="{{ route('siswa.nilai.index') }}" class="nav-link {{ request()->routeIs('siswa.nilai.*') ? 'active' : '' }}">
+                <i class="bi bi-award"></i> Nilai & Evaluasi
+            </a>
             @endrole
         @endauth
     </nav>

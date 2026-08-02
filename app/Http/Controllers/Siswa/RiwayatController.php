@@ -90,4 +90,32 @@ class RiwayatController extends Controller
         return redirect()->route('siswa.izin.index')
             ->with('success', 'Pengajuan izin berhasil dikirim. Menunggu persetujuan wali kelas.');
     }
+
+    /**
+     * Tampilkan nilai & evaluasi harian siswa.
+     */
+    public function nilaiIndex(Request $request)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return redirect()->route('dashboard')->with('error', 'Data siswa tidak ditemukan.');
+        }
+
+        $query = \App\Models\NilaiSiswa::with(['tugasMateri.guru'])
+            ->where('siswa_id', $siswa->id);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('tugasMateri', function ($q) use ($search) {
+                $q->where('mata_pelajaran', 'like', "%{$search}%")
+                  ->orWhere('bab_materi', 'like', "%{$search}%")
+                  ->orWhere('judul_tugas', 'like', "%{$search}%");
+            });
+        }
+
+        $nilaiList = $query->get()->sortByDesc(fn($n) => $n->tugasMateri->tanggal ?? now());
+        $rataRata  = $nilaiList->avg('nilai') ?? 0;
+
+        return view('siswa.nilai.index', compact('siswa', 'nilaiList', 'rataRata'));
+    }
 }

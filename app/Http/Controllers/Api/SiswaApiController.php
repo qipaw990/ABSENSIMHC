@@ -214,10 +214,11 @@ class SiswaApiController extends Controller
                 'tanggal'  => $tanggal,
             ],
             [
-                'kelas_id'   => $siswa->kelas_id,
-                'status'     => $validated['status'],
-                'jam_scan'   => now()->format('H:i:s'),
-                'keterangan' => $validated['keterangan'] . ($fotoPath ? " (Bukti: storage/{$fotoPath})" : ''),
+                'kelas_id'     => $siswa->kelas_id,
+                'status'       => $validated['status'],
+                'jam_scan'     => now()->format('H:i:s'),
+                'keterangan'   => $validated['keterangan'] . ($fotoPath ? " (Bukti: storage/{$fotoPath})" : ''),
+                'dicatat_oleh' => $user->id,
             ]
         );
 

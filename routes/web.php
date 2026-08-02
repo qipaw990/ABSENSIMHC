@@ -139,6 +139,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('pengajuan-izin', [RiwayatController::class, 'izinIndex'])->name('izin.index');
         Route::get('pengajuan-izin/create', [RiwayatController::class, 'izinCreate'])->name('izin.create');
         Route::post('pengajuan-izin', [RiwayatController::class, 'izinStore'])->name('izin.store');
+        Route::get('nilai', [RiwayatController::class, 'nilaiIndex'])->name('nilai.index');
     });
 });
 
