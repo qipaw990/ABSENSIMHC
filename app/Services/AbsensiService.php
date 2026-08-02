@@ -227,6 +227,14 @@ class AbsensiService
     }
 
     /**
+     * Alias helper method untuk kirim notifikasi WA.
+     */
+    public function kirimNotifikasiWA(Siswa $siswa, Absensi $absensi): void
+    {
+        $this->kirimNotifikasiWALangsung($absensi, $siswa);
+    }
+
+    /**
      * Kirim notifikasi WhatsApp LANGSUNG (synchronous, tanpa queue/job).
      * Dipanggil setelah absensi tersimpan.
      */
