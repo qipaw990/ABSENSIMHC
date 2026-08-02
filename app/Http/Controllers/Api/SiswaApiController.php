@@ -281,7 +281,7 @@ class SiswaApiController extends Controller
             return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 404);
         }
 
-        $nilaiList = \App\Models\NilaiSiswa::with(['tugasMateri.guru'])
+        $nilaiList = \App\Models\NilaiSiswa::with(['tugasMateri.guru', 'tugasMateri.mataPelajaran'])
             ->where('siswa_id', $siswa->id)
             ->get()
             ->sortByDesc(fn($n) => $n->tugasMateri->tanggal ?? now());
@@ -294,6 +294,8 @@ class SiswaApiController extends Controller
             'data'      => $nilaiList->map(fn($n) => [
                 'id'            => $n->id,
                 'mata_pelajaran'=> $n->tugasMateri->mata_pelajaran ?? '-',
+                'kode_mapel'    => $n->tugasMateri->mataPelajaran->kode ?? '-',
+                'guru_nama'     => $n->tugasMateri->guru->nama ?? '-',
                 'bab_materi'    => $n->tugasMateri->bab_materi ?? '-',
                 'judul_tugas'   => $n->tugasMateri->judul_tugas ?? '-',
                 'jenis_label'   => $n->tugasMateri->jenis_label ?? 'Tugas',

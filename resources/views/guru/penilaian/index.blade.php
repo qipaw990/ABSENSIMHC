@@ -60,6 +60,7 @@
                     <tr>
                         <th>#</th>
                         <th>Mata Pelajaran & Bab</th>
+                        <th>Guru Pengampu</th>
                         <th>Judul Tugas</th>
                         <th>Kelas</th>
                         <th>Jenis</th>
@@ -75,6 +76,12 @@
                         <td>
                             <div style="font-weight:600;font-size:0.88rem;color:#f1f5f9;">{{ $tugas->mata_pelajaran }}</div>
                             <div style="font-size:0.75rem;color:#94a3b8;"><i class="bi bi-book me-1"></i>{{ $tugas->bab_materi }}</div>
+                        </td>
+                        <td>
+                            <div style="font-size:0.82rem;color:#e2e8f0;font-weight:500;">{{ $tugas->guru->nama ?? '-' }}</div>
+                            @if($tugas->mataPelajaran)
+                            <span class="badge bg-slate-700 text-slate-300" style="font-size:0.68rem;">{{ $tugas->mataPelajaran->kode }}</span>
+                            @endif
                         </td>
                         <td style="font-size:0.85rem;color:#e2e8f0;font-weight:500;">{{ $tugas->judul_tugas }}</td>
                         <td><span class="badge bg-secondary" style="font-size:0.75rem;">{{ $tugas->kelas->nama ?? '-' }}</span></td>

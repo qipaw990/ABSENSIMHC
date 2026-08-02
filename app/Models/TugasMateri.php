@@ -16,6 +16,8 @@ class TugasMateri extends Model
     protected $fillable = [
         'guru_id',
         'kelas_id',
+        'mata_pelajaran_id',
+        'jadwal_pelajaran_id',
         'mata_pelajaran',
         'bab_materi',
         'judul_tugas',
@@ -36,6 +38,16 @@ class TugasMateri extends Model
     public function kelas(): BelongsTo
     {
         return $this->belongsTo(Kelas::class);
+    }
+
+    public function mataPelajaran(): BelongsTo
+    {
+        return $this->belongsTo(MataPelajaran::class, 'mata_pelajaran_id');
+    }
+
+    public function jadwalPelajaran(): BelongsTo
+    {
+        return $this->belongsTo(JadwalPelajaran::class, 'jadwal_pelajaran_id');
     }
 
     public function nilaiSiswa(): HasMany

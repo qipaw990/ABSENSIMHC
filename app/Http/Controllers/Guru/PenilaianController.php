@@ -55,12 +55,16 @@ class PenilaianController extends Controller
         $guru = $user->guru;
 
         if ($user->hasRole('guru') && $guru) {
-            $kelasList = $guru->getKelasAkses();
+            $kelasList  = $guru->getKelasAkses();
+            $jadwalList = \App\Models\JadwalPelajaran::with(['kelas', 'mataPelajaran'])->where('guru_id', $guru->id)->get();
         } else {
-            $kelasList = Kelas::with('jurusan')->orderBy('nama')->get();
+            $kelasList  = Kelas::with('jurusan')->orderBy('nama')->get();
+            $jadwalList = \App\Models\JadwalPelajaran::with(['kelas', 'mataPelajaran', 'guru'])->get();
         }
 
-        return view('guru.penilaian.create', compact('kelasList'));
+        $mapelList = \App\Models\MataPelajaran::orderBy('nama')->get();
+
+        return view('guru.penilaian.create', compact('kelasList', 'mapelList', 'jadwalList'));
     }
 
     /**
@@ -69,17 +73,27 @@ class PenilaianController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kelas_id'       => 'required|exists:kelas,id',
-            'mata_pelajaran' => 'required|string|max:255',
-            'bab_materi'     => 'required|string|max:255',
-            'judul_tugas'    => 'required|string|max:255',
-            'jenis'          => 'required|in:tugas,uh,uts,uas,praktikum',
-            'tanggal'        => 'required|date',
-            'keterangan'     => 'nullable|string|max:1000',
+            'kelas_id'            => 'required|exists:kelas,id',
+            'mata_pelajaran_id'   => 'nullable|exists:mata_pelajaran,id',
+            'jadwal_pelajaran_id' => 'nullable|exists:jadwal_pelajaran,id',
+            'mata_pelajaran'      => 'required|string|max:255',
+            'bab_materi'          => 'required|string|max:255',
+            'judul_tugas'         => 'required|string|max:255',
+            'jenis'               => 'required|in:tugas,uh,uts,uas,praktikum',
+            'tanggal'             => 'required|date',
+            'keterangan'          => 'nullable|string|max:1000',
         ]);
 
         $guru = Auth::user()->guru;
         $validated['guru_id'] = $guru?->id;
+
+        // Jika mata_pelajaran_id dipilih, otomatis update nama mata_pelajaran
+        if (!empty($validated['mata_pelajaran_id'])) {
+            $mapel = \App\Models\MataPelajaran::find($validated['mata_pelajaran_id']);
+            if ($mapel) {
+                $validated['mata_pelajaran'] = $mapel->nama;
+            }
+        }
 
         $tugas = TugasMateri::create($validated);
 

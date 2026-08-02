@@ -317,7 +317,7 @@ class GuruApiController extends Controller
         $user = $request->user();
         $guru = $user->guru;
 
-        $query = \App\Models\TugasMateri::with(['kelas', 'nilaiSiswa']);
+        $query = \App\Models\TugasMateri::with(['kelas', 'guru', 'mataPelajaran', 'nilaiSiswa']);
 
         if ($user->hasRole('guru') && $guru) {
             $query->where('guru_id', $guru->id);
@@ -332,15 +332,21 @@ class GuruApiController extends Controller
         return response()->json([
             'success' => true,
             'data'    => $tugasList->through(fn($t) => [
-                'id'             => $t->id,
-                'kelas'          => $t->kelas->nama ?? '-',
-                'mata_pelajaran' => $t->mata_pelajaran,
-                'bab_materi'     => $t->bab_materi,
-                'judul_tugas'    => $t->judul_tugas,
-                'jenis_label'    => $t->jenis_label,
-                'tanggal'        => $t->tanggal?->format('Y-m-d') ?? '-',
-                'total_siswa'    => $t->nilaiSiswa->count(),
-                'sudah_dinilai'  => $t->nilaiSiswa->where('nilai', '>', 0)->count(),
+                'id'                  => $t->id,
+                'kelas'               => $t->kelas->nama ?? '-',
+                'kelas_id'            => $t->kelas_id,
+                'guru_id'             => $t->guru_id,
+                'guru_nama'           => $t->guru->nama ?? '-',
+                'mata_pelajaran'      => $t->mata_pelajaran,
+                'mata_pelajaran_id'   => $t->mata_pelajaran_id,
+                'kode_mapel'          => $t->mataPelajaran->kode ?? '-',
+                'jadwal_pelajaran_id' => $t->jadwal_pelajaran_id,
+                'bab_materi'          => $t->bab_materi,
+                'judul_tugas'         => $t->judul_tugas,
+                'jenis_label'         => $t->jenis_label,
+                'tanggal'             => $t->tanggal?->format('Y-m-d') ?? '-',
+                'total_siswa'         => $t->nilaiSiswa->count(),
+                'sudah_dinilai'       => $t->nilaiSiswa->where('nilai', '>', 0)->count(),
             ]),
         ]);
     }
@@ -351,19 +357,24 @@ class GuruApiController extends Controller
      */
     public function penilaianDetail(int $id): JsonResponse
     {
-        $penilaian = \App\Models\TugasMateri::with(['kelas', 'nilaiSiswa.siswa'])->findOrFail($id);
+        $penilaian = \App\Models\TugasMateri::with(['kelas', 'guru', 'mataPelajaran', 'nilaiSiswa.siswa'])->findOrFail($id);
 
         return response()->json([
             'success'   => true,
             'penilaian' => [
-                'id'             => $penilaian->id,
-                'kelas'          => $penilaian->kelas->nama ?? '-',
-                'mata_pelajaran' => $penilaian->mata_pelajaran,
-                'bab_materi'     => $penilaian->bab_materi,
-                'judul_tugas'    => $penilaian->judul_tugas,
-                'jenis_label'    => $penilaian->jenis_label,
-                'tanggal'        => $penilaian->tanggal?->format('Y-m-d') ?? '-',
-                'keterangan'     => $penilaian->keterangan ?? '-',
+                'id'                  => $penilaian->id,
+                'kelas'               => $penilaian->kelas->nama ?? '-',
+                'guru_id'             => $penilaian->guru_id,
+                'guru_nama'           => $penilaian->guru->nama ?? '-',
+                'mata_pelajaran'      => $penilaian->mata_pelajaran,
+                'mata_pelajaran_id'   => $penilaian->mata_pelajaran_id,
+                'kode_mapel'          => $penilaian->mataPelajaran->kode ?? '-',
+                'jadwal_pelajaran_id' => $penilaian->jadwal_pelajaran_id,
+                'bab_materi'          => $penilaian->bab_materi,
+                'judul_tugas'         => $penilaian->judul_tugas,
+                'jenis_label'         => $penilaian->jenis_label,
+                'tanggal'             => $penilaian->tanggal?->format('Y-m-d') ?? '-',
+                'keterangan'          => $penilaian->keterangan ?? '-',
             ],
             'nilai_siswa' => $penilaian->nilaiSiswa->sortBy('siswa.nama')->values()->map(fn($n) => [
                 'id'           => $n->id,
@@ -384,17 +395,26 @@ class GuruApiController extends Controller
     public function penilaianStore(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'kelas_id'       => 'required|exists:kelas,id',
-            'mata_pelajaran' => 'required|string|max:255',
-            'bab_materi'     => 'required|string|max:255',
-            'judul_tugas'    => 'required|string|max:255',
-            'jenis'          => 'required|in:tugas,uh,uts,uas,praktikum',
-            'tanggal'        => 'required|date',
-            'keterangan'     => 'nullable|string',
+            'kelas_id'            => 'required|exists:kelas,id',
+            'mata_pelajaran_id'   => 'nullable|exists:mata_pelajaran,id',
+            'jadwal_pelajaran_id' => 'nullable|exists:jadwal_pelajaran,id',
+            'mata_pelajaran'      => 'required|string|max:255',
+            'bab_materi'          => 'required|string|max:255',
+            'judul_tugas'         => 'required|string|max:255',
+            'jenis'               => 'required|in:tugas,uh,uts,uas,praktikum',
+            'tanggal'             => 'required|date',
+            'keterangan'          => 'nullable|string',
         ]);
 
         $guru = $request->user()->guru;
         $validated['guru_id'] = $guru?->id;
+
+        if (!empty($validated['mata_pelajaran_id'])) {
+            $mapel = \App\Models\MataPelajaran::find($validated['mata_pelajaran_id']);
+            if ($mapel) {
+                $validated['mata_pelajaran'] = $mapel->nama;
+            }
+        }
 
         $tugas = \App\Models\TugasMateri::create($validated);
 

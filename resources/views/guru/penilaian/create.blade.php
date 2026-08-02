@@ -35,9 +35,42 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label font-weight-semibold">Mata Pelajaran <span class="text-danger">*</span></label>
-                    <input type="text" name="mata_pelajaran" class="form-control" placeholder="Contoh: Pemrograman Web / Matematika" value="{{ old('mata_pelajaran') }}" required>
+                    <label class="form-label font-weight-semibold">Pilih Mata Pelajaran (Master Data) <span class="text-danger">*</span></label>
+                    <select name="mata_pelajaran_id" id="mapelSelect" class="form-select" onchange="document.getElementById('inputMapelCustom').value = this.options[this.selectedIndex].text.split(' (')[0];">
+                        <option value="">-- Pilih dari Master Mapel --</option>
+                        @foreach($mapelList as $mp)
+                        <option value="{{ $mp->id }}" {{ old('mata_pelajaran_id') == $mp->id ? 'selected' : '' }}>
+                            {{ $mp->nama }} ({{ $mp->kode }})
+                        </option>
+                        @endforeach
+                    </select>
+                    <input type="hidden" name="mata_pelajaran" id="inputMapelCustom" value="{{ old('mata_pelajaran') }}">
                 </div>
+
+                @if(isset($jadwalList) && $jadwalList->count() > 0)
+                <div class="col-md-12">
+                    <label class="form-label font-weight-semibold text-info"><i class="bi bi-calendar-week me-1"></i>Pilih dari Jadwal Pelajaran Anda (Opsional)</label>
+                    <select name="jadwal_pelajaran_id" class="form-select" onchange="
+                        let selected = this.options[this.selectedIndex];
+                        if (selected.value) {
+                            let kelasId = selected.getAttribute('data-kelas');
+                            let mapelId = selected.getAttribute('data-mapel');
+                            let mapelNama = selected.getAttribute('data-mapelnama');
+                            if (kelasId) document.querySelector('[name=kelas_id]').value = kelasId;
+                            if (mapelId) document.querySelector('[name=mata_pelajaran_id]').value = mapelId;
+                            if (mapelNama) document.getElementById('inputMapelCustom').value = mapelNama;
+                        }
+                    ">
+                        <option value="">-- Pilih dari Jadwal Mengajar Anda --</option>
+                        @foreach($jadwalList as $j)
+                        <option value="{{ $j->id }}" data-kelas="{{ $j->kelas_id }}" data-mapel="{{ $j->mata_pelajaran_id }}" data-mapelnama="{{ $j->mataPelajaran->nama ?? '' }}">
+                            {{ $j->hari_label }} {{ $j->jam_format }} &mdash; {{ $j->mataPelajaran->nama ?? '-' }} ({{ $j->kelas->nama ?? '-' }})
+                        </option>
+                        @endforeach
+                    </select>
+                    <small class="form-text text-muted">Memilih jadwal akan otomatis mengisi Kelas & Mata Pelajaran.</small>
+                </div>
+                @endif
 
                 <div class="col-md-6">
                     <label class="form-label font-weight-semibold">Bab / Topik Materi <span class="text-danger">*</span></label>
