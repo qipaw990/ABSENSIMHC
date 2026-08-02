@@ -14,6 +14,21 @@ use Illuminate\Support\Facades\Route;
 | Mobile app login → dapat token → gunakan token di setiap request.
 */
 
+// ── Root API Check (Publik) ────────────────--------------------------------
+Route::get('/', function () {
+    return response()->json([
+        'status'    => 'online',
+        'service'   => 'RESTful API Sistem Absensi MHC',
+        'developer' => 'qpawdeveloper',
+        'version'   => '1.0.0',
+        'endpoints' => [
+            'login'  => 'POST /api/auth/login',
+            'health' => 'GET /up',
+        ],
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
+
 // ── Auth (Publik) ──────────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
