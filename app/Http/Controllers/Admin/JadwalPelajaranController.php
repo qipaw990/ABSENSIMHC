@@ -91,10 +91,3 @@ class JadwalPelajaranController extends Controller
         return back()->with('success', 'Jadwal pelajaran berhasil dihapus.');
     }
 }
-
-/**
- * Extension macro untuk urutan hari (Senin -> Sabtu)
- */
-JadwalPelajaran::macro('scopeOrderByFieldHari', function ($query) {
-    return $query->orderByRaw("FIELD(hari, 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu')");
-});

@@ -48,4 +48,9 @@ class JadwalPelajaran extends Model
         $selesai = substr($this->jam_selesai, 0, 5);
         return "{$mulai} - {$selesai}";
     }
+
+    public function scopeOrderByFieldHari($query)
+    {
+        return $query->orderByRaw("FIELD(hari, 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu')");
+    }
 }
