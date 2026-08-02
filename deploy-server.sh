@@ -72,15 +72,12 @@ if docker ps | grep -q "absensi_app"; then
     echo "      📦 Menjalankan migration..."
     docker exec absensi_app php artisan migrate --force || echo -e "      ${YELLOW}[SKIP] Migration tidak ada perubahan${NC}"
 
-    echo "      🗑️  Clear cache..."
+    echo "      🗑️  Clear cache & remove stale cache files..."
+    docker exec absensi_app rm -f bootstrap/cache/routes-v7.php bootstrap/cache/config.php
     docker exec absensi_app php artisan config:clear
     docker exec absensi_app php artisan route:clear
     docker exec absensi_app php artisan view:clear
-
-    echo "      ⚡ Optimize cache..."
-    docker exec absensi_app php artisan config:cache
-    docker exec absensi_app php artisan route:cache
-    docker exec absensi_app php artisan view:cache
+    docker exec absensi_app php artisan cache:clear
 
     echo -e "      ${GREEN}✓ Artisan commands selesai${NC}"
 else

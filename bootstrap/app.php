@@ -16,11 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
             'api',
+            'api/auth/login',
+            'auth/login',
         ]);
         // Daftarkan alias middleware Spatie Permission
         $middleware->alias([
-            'role'       => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
     })
@@ -33,8 +35,5 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Cek status WA sender setiap jam
         $schedule->command('wa:check-sender-status')->hourly();
-
-        // Jalankan queue worker (opsional jika tidak pakai supervisor)
-        // $schedule->command('queue:work --queue=notifikasi-wa --tries=3 --stop-when-empty')->everyMinute()->withoutOverlapping();
     })
     ->create();
