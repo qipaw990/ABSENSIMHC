@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes — Sistem Absensi QR Code
+| API Routes — Sistem Absensi QR Code (qpawdeveloper)
 |--------------------------------------------------------------------------
 | Autentikasi menggunakan Laravel Sanctum (Bearer Token).
 | Mobile app login → dapat token → gunakan token di setiap request.
@@ -16,36 +16,45 @@ use Illuminate\Support\Facades\Route;
 
 // ── Auth (Publik) ──────────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
-    Route::post('login',  [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login']);
 });
 
 // ── Protected Routes (butuh Bearer Token) ─────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
+    // Auth & Pengaturan Profil
     Route::prefix('auth')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('me',      [AuthController::class, 'me']);
+        Route::post('logout',          [AuthController::class, 'logout']);
+        Route::get('me',               [AuthController::class, 'me']);
+        Route::post('change-password', [AuthController::class, 'changePassword']);
+        Route::post('fcm-token',       [AuthController::class, 'updateDeviceToken']);
     });
 
     // ── Guru / Wali Kelas ──────────────────────────────────────────────────
     Route::middleware('role:guru|admin|super_admin')->prefix('guru')->group(function () {
-        Route::get('kelas',                          [GuruApiController::class, 'kelasList']);
-        Route::get('kelas/{id}/stats',               [GuruApiController::class, 'kelasStats']);
-        Route::get('kelas/{id}/belum-scan',          [GuruApiController::class, 'belumScan']);
-        Route::post('absensi/scan',                  [GuruApiController::class, 'scan']);
-        Route::get('absensi/rekap/{kelas_id}',       [GuruApiController::class, 'rekap']);
+        Route::get('kelas',                    [GuruApiController::class, 'kelasList']);
+        Route::get('kelas/{id}/stats',         [GuruApiController::class, 'kelasStats']);
+        Route::get('kelas/{id}/belum-scan',    [GuruApiController::class, 'belumScan']);
+        Route::post('absensi/scan',            [GuruApiController::class, 'scan']);
+        Route::post('absensi/manual',          [GuruApiController::class, 'inputManual']);
+        Route::get('absensi/rekap/{kelas_id}', [GuruApiController::class, 'rekap']);
     });
 
     // ── Siswa ──────────────────────────────────────────────────────────────
     Route::middleware('role:siswa')->prefix('siswa')->group(function () {
-        Route::get('profile',           [SiswaApiController::class, 'profile']);
-        Route::get('absensi',           [SiswaApiController::class, 'riwayat']);
-        Route::get('absensi/stats',     [SiswaApiController::class, 'stats']);
+        Route::get('profile',       [SiswaApiController::class, 'profile']);
+        Route::post('qr-refresh',   [SiswaApiController::class, 'refreshQr']);
+        Route::get('absensi',       [SiswaApiController::class, 'riwayat']);
+        Route::get('absensi/stats', [SiswaApiController::class, 'stats']);
+        Route::post('izin-sakit',   [SiswaApiController::class, 'pengajuanIzin']);
     });
 
     // ── Admin / Super Admin ────────────────────────────────────────────────
     Route::middleware('role:admin|super_admin')->prefix('admin')->group(function () {
         Route::get('dashboard', [AdminApiController::class, 'dashboard']);
+        Route::get('siswa',     [AdminApiController::class, 'siswaList']);
+        Route::get('guru',      [AdminApiController::class, 'guruList']);
+        Route::get('wa-sender', [AdminApiController::class, 'waSenderList']);
+        Route::get('wa-logs',   [AdminApiController::class, 'waLogsList']);
     });
 });

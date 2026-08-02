@@ -155,4 +155,82 @@ class SiswaApiController extends Controller
             'total_hari'     => $totalHariMasuk,
         ]);
     }
+
+    /**
+     * Refresh / Re-generate QR token siswa.
+     * POST /api/siswa/qr-refresh
+     */
+    public function refreshQr(Request $request): JsonResponse
+    {
+        $user  = $request->user();
+        $siswa = $user->siswa;
+
+        if (!$siswa) {
+            return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 404);
+        }
+
+        $newToken = \Illuminate\Support\Str::random(32);
+        $siswa->update([
+            'qr_token' => $newToken,
+        ]);
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'QR Token berhasil diperbarui.',
+            'qr_token' => $newToken,
+        ]);
+    }
+
+    /**
+     * Pengajuan Izin/Sakit dari HP Siswa dengan lampiran keterangan/surat.
+     * POST /api/siswa/izin-sakit
+     */
+    public function pengajuanIzin(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'status'     => 'required|in:izin,sakit',
+            'keterangan' => 'required|string|max:255',
+            'tanggal'    => 'nullable|date',
+            'bukti_foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $user  = $request->user();
+        $siswa = $user->siswa;
+
+        if (!$siswa) {
+            return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 404);
+        }
+
+        $tanggal = $validated['tanggal'] ?? today()->toDateString();
+        $fotoPath = null;
+
+        if ($request->hasFile('bukti_foto')) {
+            $fotoPath = $request->file('bukti_foto')->store('izin_sakit', 'public');
+        }
+
+        $absensi = Absensi::updateOrCreate(
+            [
+                'siswa_id' => $siswa->id,
+                'tanggal'  => $tanggal,
+            ],
+            [
+                'kelas_id'   => $siswa->kelas_id,
+                'status'     => $validated['status'],
+                'jam_scan'   => now()->format('H:i:s'),
+                'keterangan' => $validated['keterangan'] . ($fotoPath ? " (Bukti: storage/{$fotoPath})" : ''),
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengajuan ' . strtoupper($validated['status']) . ' berhasil dikirim.',
+            'absensi' => [
+                'id'           => $absensi->id,
+                'status'       => $absensi->status,
+                'status_label' => $absensi->status_label,
+                'keterangan'   => $absensi->keterangan,
+                'tanggal'      => $absensi->tanggal,
+            ],
+        ]);
+    }
 }

@@ -1,125 +1,190 @@
-# 🚀 PANDUAN KOMERSIALISASI & INSTALASI APLIKASI ABSENSI QR CODE & WA
+# 💰 PANDUAN KOMERSIALISASI, PROPOSAL PENJUALAN & PAKET HARGA SEKOLAH
+> **Developer & Provider:** qpawdeveloper  
+> **Lisensi Resmi:** Commercial & School Edition
 
-Dokumen ini berisi **Panduan Penjualan, Strategi Bisnis, serta Panduan Instalasi 1-Klik** untuk menjual aplikasi **Sistem Absensi QR Code & Notifikasi WhatsApp Otomatis** ke sekolah-sekolah atau klien.
+Dokumen ini merupakan **Panduan Strategi Bisnis, Paket Harga Pasar (EdTech Indonesia), Template Penawaran, dan Panduan Komersialisasi** untuk menjual **Sistem Absensi QR Code & Notifikasi WhatsApp Otomatis** buatan **qpawdeveloper** ke sekolah (SD, SMP, SMA, SMK, maupun Pesantren).
 
 ---
 
 ## 📑 DAFTAR ISI
-1. [Fitur Unggulan (Brosur Penjualan)](#1-fitur-unggulan-brosur-penjualan)
-2. [Paket Harga & Strategi Komersial](#2-paket-harga--strategi-komersial)
-3. [Panduan Instalasi 1-Klik (Untuk Pembeli)](#3-panduan-instalasi-1-klik-untuk-pembeli)
-4. [Alur Penggunaan Aplikasi (Quick Start)](#4-alur-penggunaan-aplikasi-quick-start)
-5. [Pemeliharaan & Update System](#5-pemeliharaan--update-system)
+1. [Riset Pasar & Positioning Produk](#1-riset-pasar--positioning-produk)
+2. [Point Penjualan Utama (Pitching Point untuk Kepala Sekolah)](#2-point-penjualan-utama-pitching-point-untuk-kepala-sekolah)
+3. [Paket Harga Penjualan (Sesuai Pasaran Indonesia)](#3-paket-harga-penjualan-sesuai-pasaran-indonesia)
+   - [Skema A: Sekali Bayar (Jual Putus / Self-Hosted)](#skema-a-sekali-bayar-jual-putus--self-hosted---rekomendasi-utama)
+   - [Skema B: Langganan SaaS (Software as a Service)](#skema-b-langganan-saas-software-as-a-service)
+4. [Layanan Tambahan (Upselling & Passive Income)](#4-layanan-tambahan-upselling--passive-income)
+5. [Simulasi Proyeksi Keuntungan Vendor / Reseller](#5-simulasi-proyeksi-keuntungan-vendor--reseller)
+6. [Template Draft Proposal & Surat Penawaran Resmi](#6-template-draft-proposal--surat-penawaran-resmi)
+7. [Alur Kerja Transaksi & Pelatihan Operator Sekolah](#7-alur-kerja-transaksi--pelatihan-operator-sekolah)
 
 ---
 
-## 1. 🌟 FITUR UNGGULAN (BROSUR PENJUALAN)
+## 1. 📊 RISET PASAR & POSITIONING PRODUK
 
-Gunakan poin-poin ini saat menawarkan ke pihak Sekolah (Kepala Sekolah/Wakasek/Kurikulum):
+Di Indonesia, sekolah-sekolah (khususnya swasta maupun negeri yang berkembang) menghadapi masalah utama:
+1. **Kurangnya Komunikasi Real-Time**: Orang tua khawatir apakah anaknya benar-benar sampai di sekolah atau membolos.
+2. **Keterlambatan Penanganan Siswa**: Pencatatan manual di kertas sering memakan waktu 15–30 menit jam pelajaran pertama dan rawan manipulasi.
+3. **Biaya SMS / WA API Mahal**: Aplikasi absensi lain mengenakan biaya kirim SMS/WA per-pesan (Rp 150 – Rp 300 per SMS/WA), yang membebani anggaran sekolah hingga jutaan rupiah per bulan.
 
-* **⚡ Scan QR Code Super Cepat**: Pakai kamera HP, Tablet, Laptop, maupun Scanner QR USB tanpa perangkat mahal.
-* **📱 Notifikasi WhatsApp Otomatis ke Orang Tua**: Begitu siswa scan QR, pesan WA otomatis terkirim ke WhatsApp Orang Tua (Status: Hadir / Terlambat / Alpha / Izin).
-* **🪪 Cetak Batch Kartu QR Pelajar (PDF)**: Sekali klik bisa cetak kartu pelajar berisi QR Code untuk 1 kelas penuh siap cetak/laminating.
-* **📊 Rekapitulasi & Laporan Otomatis**: Rekap harian, bulanan, per siswa, dan export PDF/Excel secara instant.
-* **⏰ Pengaturan Jam Absensi Fleksibel**: Atur batas jam masuk, batas jam keterlambatan, dan hari libur per kelas.
-* **👥 Multi Level Akses**:
-  * **Super Admin**: Akses penuh ke seluruh fitur & WA Sender.
-  * **Admin**: Kelola data siswa, guru, kelas, dan jurusan.
-  * **Guru / Wali Kelas**: Scan QR kelas & monitoring presensi siswa.
-  * **Siswa**: Melihat riwayat kehadiran pribadi.
-* **🔒 Self-Hosted & Bebas Biaya Langganan Server**: Bisa diinstall di server lokal sekolah (Local LAN) maupun Cloud Server (VPS).
+### 💡 Keunggulan Utama Aplikasi (qpawdeveloper) Dibanding Kompetitor:
+* **Bebas Biaya Per-Pesan**: Menggunakan **WhatsApp Gateway Dedicated** milik sekolah. Kirim 10.000+ pesan per bulan tanpa biaya kirim per-pesan.
+* **Tidak Membutuhkan Alat Absensi Mahal**: Cukup gunakan Smartphone Guru, Tablet, Laptop, atau USB QR Scanner biasa seharga Rp 200rb-an.
+* **Opsi Self-Hosted (Data Aman di Server Sekolah)**: Sekolah memiliki kendali penuh atas data siswa tanpa takut kebocoran data di cloud pihak ketiga.
+* **Cetak Batch Kartu Pelajar PVC / PDF 1-Klik**: Hemat biaya pembuatan kartu pelajar sekolah hingga 70%.
 
 ---
 
-## 2. 💰 PAKET HARGA & STRATEGI KOMERSIAL
+## 2. 🌟 POINT PENJUALAN UTAMA (PITCHING POINT UNTUK KEPALA SEKOLAH)
 
-Anda dapat menggunakan **2 Skema Bisnis** berikut:
+Saat melakukan audiensi dengan **Kepala Sekolah, Wakasek Kesiswaan, atau Ketua Yayasan**, tekankan 4 nilai jual ini:
 
-### Skema A: Sekali Bayar (Jual Putus / Self-Hosted)
-* **Harga**: **Rp 2.500.000 – Rp 5.000.000** per sekolah.
-* **Termasuk**:
-  * Source code & instalasi di server sekolah (PC Windows / CasaOS / VPS).
-  * Pelatihan operator sekolah (1-2 jam).
-  * Garansi / maintenance gratis 1-3 bulan pertama.
-
-### Skema B: Langganan Bulanan / Tahunan (SaaS Service)
-* **Harga**: **Rp 300.000 – Rp 750.000** / bulan per sekolah.
-* **Keuntungan**: Pendapatan berulang (recurring income) setiap bulan/tahun.
-
-### 💡 Pendapatan Tambahan (Upselling Options):
-* **Jasa Cetak Kartu Pelajar PVC**: Rp 5.000 – Rp 10.000 / siswa (Modal Rp 1.500/kartu, untung hingga 400%).
-* **Integrasi Gateway WhatsApp (Fonnte)**: Sediakan saldo WA / nomor sender khusus sekolah.
+1. **🔒 Peningkatan Citra & Modernisasi Sekolah**:
+   * Sekolah tampil modern dan canggih di mata wali murid karena memiliki sistem absensi otomatis berbasis QR Code & WA.
+2. **📱 Ketenangan Hati Wali Murid (Parent Peace of Mind)**:
+   * Begitu siswa scan QR di gerbang atau kelas, HP orang tua langsung menerima notifikasi WA lengkap dengan jam masuk & status (Hadir/Terlambat).
+3. **⏱️ Efisiensi Waktu Belajar Mengajar**:
+   * Guru tidak perlu lagi memanggil nama siswa satu per satu di kelas. Absensi selesai dalam hitungan detik.
+4. **📊 Laporan Otomatis & Akurat untuk Akreditasi**:
+   * Rekapitulasi kehadiran harian, bulanan, persentase keterlambatan, dan surat izin/sakit langsung siap cetak/export PDF & Excel.
 
 ---
 
-## 3. 🛠️ PANDUAN INSTALASI 1-KLIK (UNTUK PEMBELI)
+## 3. 🏷️ PAKET HARGA PENJUALAN (SESUAI PASARAN INDONESIA)
 
-Sistem sudah dilengkapi dengan **Script Installer Otomatis Interaktif**.
-
-### A. Instalasi di Linux / VPS / CasaOS (Rekomendasi)
-
-1. Upload seluruh folder aplikasi ke server pembeli (misal ke `/DATA/AppData/absensi_qrcode` atau `/home/ubuntu/absensi`).
-2. Masuk ke terminal server dan jalankan perintah 1-klik:
-   ```bash
-   cd /DATA/AppData/absensi_qrcode
-   chmod +x install.sh update.sh backup.sh
-   bash install.sh
-   ```
-3. Script akan meminta input interaktif:
-   * Nama Sekolah
-   * URL/Domain Sekolah (contoh: `https://absensi.smk.sch.id` atau `http://192.168.1.100:8585`)
-   * Port Aplikasi (default: 8585)
-   * Email & Password Admin Kustom
-4. Selesai! Aplikasi langsung siap digunakan.
+Anda dapat menawarkan **2 Skema Lisensi** sesuai budget & preferensi pihak sekolah:
 
 ---
 
-### B. Instalasi di Windows (Menggunakan Docker Desktop)
+### SKEMA A: SEKALI BAYAR (JUAL PUTUS / SELF-HOSTED) — *Rekomendasi Utama*
+> *Cocok untuk sekolah yang ingin bayar sekali tanpa biaya langganan bulanan aplikasi.*
 
-1. Pastikan **Docker Desktop** sudah terinstall di PC Windows server sekolah.
-2. Buka `Command Prompt` (CMD) atau PowerShell di folder project.
-3. Jalankan:
-   ```cmd
-   deploy-push.bat "Initial Setup"
-   ```
-4. Buka browser: `http://localhost:8585`
-
----
-
-## 4. 🚀 ALUR PENGGUNAAN APLIKASI (QUICK START)
-
-Setelah instalasi selesai, ikuti langkah mudah ini:
-
-1. **Login Super Admin**:
-   * Buka URL aplikasi ➔ Login menggunakan email & password admin yang dibuat saat instalasi.
-2. **Koneksikan WA Gateway**:
-   * Masuk ke menu **WA Sender** ➔ Tambahkan Token Fonnte ([fonnte.com](https://fonnte.com)).
-3. **Persiapkan Data Master**:
-   * Tambah Data **Jurusan**, **Tahun Ajaran**, dan **Kelas**.
-   * Hubungkan **Kelas** dengan **WA Sender**.
-4. **Input Data Siswa & Cetak Kartu**:
-   * Masuk ke Data Siswa ➔ Import via Excel atau Tambah Manual (sertakan No. WA Orang Tua).
-   * Klik tombol **Cetak Batch Kartu QR** untuk mengunduh PDF kartu pelajar siap cetak.
-5. **Mulai Scan Absensi**:
-   * Wali kelas/Guru login ➔ Masuk menu **Scan Absensi** ➔ Pilih Kelas ➔ Arahkan QR Code siswa ke kamera.
-   * Notifikasi WA langsung terkirim otomatis ke HP Orang Tua!
+| Fitur / Layanan | 🥉 Paket LITE | 🥈 Paket STANDARD *(Most Popular)* | 🥇 Paket ENTERPRISE (Turnkey) |
+| :--- | :---: | :---: | :---: |
+| **Harga Penjualan** | **Rp 1.950.000** | **Rp 3.500.000** | **Rp 6.500.000** |
+| **Kapasitas Siswa** | s.d 300 Siswa | s.d 1.000 Siswa | Unlimited Siswa |
+| **Instalasi Server** | Local PC / XAMPP | Docker Local / VPS Sekolah | Server Cloud Dedicated + SSL |
+| **WhatsApp Gateway** | 1 Device WA Sender | Multi-Sender per Kelas | Multi-Sender + Redundant WA |
+| **Fitur QR & Laporan** | ✅ Lengkap | ✅ Lengkap | ✅ Lengkap |
+| **Cetak Batch Kartu** | ✅ Format PDF | ✅ Format PDF + Template Kustom | ✅ PDF + Free 100 Kartu PVC Cetak |
+| **Hardware Scanner** | ❌ (Pakai HP/Laptop) | ❌ (Pakai HP/Laptop) | ✅ **Free 1 Unit USB QR Scanner** |
+| **Pelatihan Operator** | Online (1 Jam) | On-Site / Online (2 Jam) | On-Site Full Training & Pendampingan |
+| **Garansi & Support** | 1 Bulan | 6 Bulan | **1 Tahun Full Support** |
 
 ---
 
-## 5. 🔄 PEMELIHARAAN & UPDATE SYSTEM
+### SKEMA B: LANGGANAN SAAS (SOFTWARE AS A SERVICE)
+> *Cocok untuk sekolah yang ingin investasi awal kecil (OPEX bulanan/tahunan).*
 
-### Update Aplikasi (Jika Ada Fitur Baru):
-Pembeli cukup menjalankan 1 perintah update tanpa menghapus data yang ada:
-```bash
-bash update.sh
+| Nama Paket | Kapasitas Siswa | Harga Bulanan | Harga Tahunan *(Diskon 2 Bulan)* | Fitur & Layanan |
+| :--- | :---: | :---: | :---: | :--- |
+| **Paket BRONZE** | s.d 250 Siswa | **Rp 249.000** / bln | **Rp 2.490.000** / thn | Cloud Server, 1 WA Sender, Support Online |
+| **Paket SILVER** | s.d 600 Siswa | **Rp 449.000** / bln | **Rp 4.490.000** / thn | Cloud Server, Multi WA Sender, Priority Support |
+| **Paket GOLD** | > 600 Siswa | **Rp 749.000** / bln | **Rp 7.490.000** / thn | Dedicated Server, Multi WA Sender, Custom Domain, VIP Support |
+
+---
+
+## 4. 🛍️ LAYANAN TAMBAHAN (UPSELLING & PASSIVE INCOME)
+
+Selain menjual aplikasi, Anda dapat meningkatkan nilai transaksi (Order Value) dengan menawarkan add-on berikut:
+
+1. **🪪 Jasa Cetak Kartu Pelajar PVC QR Code**:
+   * **Harga Jual ke Sekolah**: **Rp 7.500 – Rp 12.000** / siswa.
+   * **Biaya Modal PVC**: ± Rp 1.800 / kartu.
+   * *Potensi Profit (500 Siswa)*: 500 x Rp 7.000 = **Rp 3.500.000 bersih!**
+2. **🔌 Hardware QR Code Scanner USB Heavy-Duty**:
+   * **Harga Jual**: **Rp 450.000 – Rp 650.000** / unit.
+   * **Modal Wholesale**: ± Rp 220.000 / unit.
+3. **📱 Sewa Dedicated WA Sender / Saldo Nomor Server**:
+   * **Harga Layanan**: **Rp 150.000 – Rp 250.000** / bulan per nomor sender sekolah.
+4. **🔄 Perpanjangan SLA Maintenance & Support (Tahun ke-2 dst)**:
+   * **Biaya Perpanjangan**: **Rp 1.000.000 – Rp 1.500.000** / tahun (Passive income tahunan Anda!).
+
+---
+
+## 5. 📈 SIMULASI PROYEKSI KEUNTUNGAN VENDOR / RESELLER
+
+### Contoh Skenario: Penjualan ke 1 Sekolah (Sekolah Sedang - 500 Siswa)
+
+```
+[PENDAPATAN]
+1. Paket Penjualan Standard (Sekali Bayar)    : Rp 3.500.000
+2. Cetak Kartu Pelajar PVC (500 x Rp 8.000)   : Rp 4.000.000
+3. 2 Unit Hardware USB QR Code Scanner       : Rp   900.000
+--------------------------------------------------------------
+TOTAL PENDAPATAN KOTOR                        : Rp 8.400.000
+
+[BIAYA MODAL (COGS)]
+1. Modal Cetak Kartu PVC (500 x Rp 2.000)     : Rp 1.000.000
+2. Modal 2 Unit USB Scanner                   : Rp   450.000
+3. Biaya Transportasi & Pelatihan             : Rp   350.000
+--------------------------------------------------------------
+TOTAL BIAYA MODAL                             : Rp 1.800.000
+
+🔥 KEUNTUNGAN BERSIH VENDOR                   : Rp 6.600.000 / Sekolah!
 ```
 
-### Backup Data (Database + File):
-Untuk mengamankan data sekolah secara rutin:
-```bash
-bash backup.sh
-```
-*(File backup `.tar.gz` akan otomatis tersimpan di folder `backups/`)*
+> **Jika dalam 1 Bulan Anda Menutup 3 Sekolah**: Profit bersih mencapai **> Rp 19.800.000 / bulan**!
 
 ---
-*Dibuat untuk Lisensi Komersial & Distribusi Klien.*
+
+## 6. 📝 TEMPLATE DRAFT PROPOSAL & SURAT PENAWARAN RESMI
+
+Gunakan draf surat penawaran ini saat mengajukan proposal ke Sekolah:
+
+```text
+HAL   : Penawaran Kerjasama Sistem Absensi QR Code & Notifikasi WhatsApp Otomatis
+LAMP  : 1 Berkas Proposal & Brosur Fitur
+
+Kepada Yth,
+Bapak/Ibu Kepala Sekolah
+[Nama Sekolah]
+di Tempat
+
+Dengan hormat,
+
+Seiring dengan perkembangan teknologi informasi di bidang pendidikan, kenyamanan dan keamanan siswa serta keterbukaan informasi kepada wali murid menjadi prioritas utama lembaga pendidikan.
+
+Bersama surat ini, kami qpawdeveloper ingin menawarkan solusi **Sistem Absensi Digital Berbasis QR Code dengan Notifikasi WhatsApp Real-Time**. Sistem ini dirancang untuk membantu sekolah dalam:
+
+1. Mengirim notifikasi kehadiran siswa (Hadir/Terlambat) secara OTOMATIS ke WhatsApp Orang Tua detik itu juga saat scan QR.
+2. Memangkas waktu pencatatan absensi di kelas dari 20 menit menjadi 2 menit.
+3. Mencetak Kartu Pelajar ber-QR Code secara instan.
+4. Menyediakan Rekapitulasi Laporan Kehadiran bulanan yang akurat untuk evaluasi kesiswaan & akreditasi.
+
+Sistem kami bersifat **BEBAS BIAYA PER-PESAN WA** dan dapat diinstall di server lokal sekolah maupun cloud server.
+
+Kami siap memberikan **DEMO APLIKASI GRATIS** di sekolah Bapak/Ibu untuk memperlihatkan keunggulan sistem ini secara langsung.
+
+Demikian surat penawaran ini kami sampaikan. Atas perhatian dan kesediaan Bapak/Ibu, kami ucapkan terima kasih.
+
+Hormat kami,
+
+qpawdeveloper
+Development & IT EdTech Solution
+WhatsApp / Telp: [Nomor Kontak Anda]
+Email / Website: [Email/Website Anda]
+```
+
+---
+
+## 7. 🔄 ALUR KERJA TRANSAKSI & PELATIHAN OPERATOR SEKOLAH
+
+1. **Tahap 1: Presentasi & Demo System**:
+   * Bawalah Laptop & 1 HP yang sudah terhubung ke aplikasi demo.
+   * Demonstrasikan scan QR siswa ➔ Tunjukkan notifikasi WA yang langsung masuk ke HP Kepala Sekolah/Guru.
+2. **Tahap 2: Pengisian Form Data Sekolah**:
+   * Kirimkan template Excel Data Siswa, Guru, dan Kelas ke Operator Sekolah untuk diisi.
+3. **Tahap 3: Instalasi Server & Import Data**:
+   * Jalankan `install.sh` di server sekolah (atau VPS).
+   * Import data Master Siswa & Kelas via file Excel.
+4. **Tahap 4: Pengaturan WA Sender**:
+   * Hubungkan nomor WhatsApp resmi sekolah / wali kelas ke dashboard WA Sender.
+5. **Tahap 5: Cetak Kartu & Training Operator**:
+   * Generate PDF Kartu Pelajar QR Code ➔ Cetak kartu.
+   * Lakukan pelatihan 1-2 jam kepada Wali Kelas & Operator Absensi.
+6. **Tahap 6: Serah Terima & Pembayaran (BAST)**:
+   * Penandatanganan Berita Acara Serah Terima (BAST) dan pelunasan pembayaran.
+
+---
+
+*Developed by **qpawdeveloper** — Dibuat untuk Lisensi Distribusi, Partner Reseller, dan Vendor Sistem Absensi Sekolah.*

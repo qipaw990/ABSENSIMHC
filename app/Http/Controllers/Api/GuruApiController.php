@@ -185,4 +185,55 @@ class GuruApiController extends Controller
             'stats' => $this->absensiService->rekapHariIni($kelasId),
         ]);
     }
+
+    /**
+     * Presensi manual siswa oleh guru/wali kelas (misal siswa tidak membawa QR/HP).
+     * POST /api/guru/absensi/manual
+     */
+    public function inputManual(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'siswa_id'   => 'required|integer|exists:siswa,id',
+            'kelas_id'   => 'required|integer|exists:kelas,id',
+            'status'     => 'required|in:hadir,terlambat,izin,sakit,alpha',
+            'keterangan' => 'nullable|string|max:255',
+            'tanggal'    => 'nullable|date',
+        ]);
+
+        $tanggal = $validated['tanggal'] ?? today()->toDateString();
+        $siswa   = Siswa::findOrFail($validated['siswa_id']);
+
+        $absensi = Absensi::updateOrCreate(
+            [
+                'siswa_id' => $siswa->id,
+                'tanggal'  => $tanggal,
+            ],
+            [
+                'kelas_id'   => $validated['kelas_id'],
+                'status'     => $validated['status'],
+                'jam_scan'   => now()->format('H:i:s'),
+                'keterangan' => $validated['keterangan'] ?? null,
+            ]
+        );
+
+        // Kirim notifikasi WA
+        try {
+            $this->absensiService->kirimNotifikasiWA($siswa, $absensi);
+        } catch (\Exception $e) {
+            // Log error tapi jangan gagalkan respon API
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Presensi manual {$siswa->nama} (" . strtoupper($validated['status']) . ") berhasil disimpan.",
+            'absensi' => [
+                'id'           => $absensi->id,
+                'siswa_nama'   => $siswa->nama,
+                'status'       => $absensi->status,
+                'status_label' => $absensi->status_label,
+                'jam_scan'     => $absensi->jam_scan,
+                'tanggal'      => $absensi->tanggal,
+            ],
+        ]);
+    }
 }

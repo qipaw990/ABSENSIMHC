@@ -1,61 +1,66 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📱 Sistem Absensi QR Code & Notifikasi WhatsApp (MHC)
+> **Developer:** qpawdeveloper  
+> **Official License:** Commercial & School Edition
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Absensi Sekolah Berbasis QR Code dengan Notifikasi WhatsApp Real-Time ke Orang Tua Siswa, Rekapitulasi Laporan Automatic, Cetak Batch Kartu QR Pelajar PDF, dan Multi-Sender per Kelas.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🌟 Fitur Utama
+* **⚡ Web-based QR Code Scanner**: Mendukung scan cepat via Kamera HP, Tablet, Laptop, maupun USB QR Scanner.
+* **📱 WhatsApp Gateway Real-Time**: Notifikasi otomatis ke orang tua begitu siswa melakukan presensi (Hadir / Terlambat / Alpha / Izin).
+* **🪪 Cetak Batch Kartu Pelajar (PDF)**: Sekali klik untuk generate dan cetak kartu pelajar berpola QR Code per kelas.
+* **📊 Laporan & Rekapitulasi**: Export laporan kehadiran per kelas/siswa ke PDF & Excel.
+* **⏰ Pengaturan Jam Absensi**: Batas masuk, toleransi keterlambatan, dan jam kerja per kelas.
+* **🤖 Android Mobile App API**: RESTful API lengkap (Sanctum Auth, QR Scanner, Siswa Profile, Admin Dashboard, Push Notification FCM).
+* **🐳 Dockerized Deployment**: Siap di-deploy dengan Docker Compose & script 1-klik (`install.sh`).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 💰 Paket Harga Penjualan (Commercial Pricing)
 
-## Learning Laravel
+Aplikasi ini dapat dikomersialkan ke sekolah-sekolah (SD, SMP, SMA, SMK) dengan skema:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+| Paket Penjualan | Harga Lisensi | Keunggulan & Layanan |
+| :--- | :--- | :--- |
+| **🥉 Paket LITE** | **Rp 1.950.000** *(Sekali Bayar)* | s.d 300 Siswa, Local Server, 1 WA Sender, Online Training |
+| **🥈 Paket STANDARD** | **Rp 3.500.000** *(Sekali Bayar)* | s.d 1.000 Siswa, VPS/Local, Multi-Sender WA per Kelas, Support 6 Bulan |
+| **🥇 Paket ENTERPRISE** | **Rp 6.500.000** *(Sekali Bayar)* | Unlimited Siswa, Free Hardware Scanner, 100 Kartu PVC, Support 1 Tahun |
+| **🔄 Langganan SaaS** | **Rp 249rb – Rp 749rb** / bulan | Tanpa server sekolah, Managed Cloud Server, Free Update |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 📖 Dokumentasi Lengkap
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+👉 **[PANDUAN KOMERSIALISASI, PENJUALAN & PAKET HARGA](file:///c:/xampp/htdocs/absensi_qrcode/PANDUAN_PENJUALAN_DAN_INSTALASI.md)**
+*(Berisi analisis harga pasar, draf proposal ke Sekolah, proyeksi profit vendor, dan skema paket).*
 
-### Premium Partners
+👉 **[PANDUAN INSTALASI & INTEGRASI WHATSAPP GATEWAY](file:///c:/xampp/htdocs/absensi_qrcode/PANDUAN_INSTALASI_GATEWAY.md)**
+*(Berisi langkah-langkah teknis instalasi Docker / XAMPP dan integrasi WhatsApp Gateway API).*
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+👉 **[DOKUMENTASI RESTFUL API APLIKASI ANDROID](file:///c:/xampp/htdocs/absensi_qrcode/DOKUMENTASI_API_ANDROID.md)**
+*(Spesifikasi lengkap REST API, payload JSON, dan contoh implementasi Kotlin Retrofit).*
 
-## Contributing
+👉 **[PROMPT MASTER PEMBUATAN APLIKASI ANDROID MODERN](file:///c:/xampp/htdocs/absensi_qrcode/PROMPT_PEMBUATAN_APLIKASI_ANDROID.md)**
+*(Prompt AI siap pakai untuk membangun aplikasi mobile Android tampilan modern).*
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+👉 **[KODE SUMBER KOTLIN ANDROID NATIVE APP](file:///c:/xampp/htdocs/absensi_qrcode/KOTLIN_ANDROID_APP_CODE.md)**
+*(Source Code & Arsitektur Lengkap Android Native Kotlin + Jetpack Compose + Material 3 + Retrofit 2 + CameraX + ML Kit).*
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## ⚡ Quick Start 1-Klik (Docker)
 
-## Security Vulnerabilities
+```bash
+# Clone / upload project ke server
+cd /DATA/AppData/absensi_qrcode
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Berikan izin eksekusi
+chmod +x install.sh update.sh backup.sh
 
-## License
+# Jalankan installer otomatis
+./install.sh
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-"# ABSENSIMHC" 
-"# ABSENSIMHC" 
+---
+*Developed by **qpawdeveloper** — Hak Cipta & Lisensi Komersial Sekolah.*

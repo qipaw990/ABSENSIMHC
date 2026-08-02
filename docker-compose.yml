@@ -52,13 +52,13 @@ services:
       MYSQL_DATABASE: absensi_mhc
       MYSQL_USER: absensi_user
       MYSQL_PASSWORD: "AbsensiMHC@2025"
-      MYSQL_ROOT_PASSWORD: "RootMHC@2025"
+      MYSQL_ROOT_PASSWORD: "@dminX12"
     volumes:
       - db_data:/var/lib/mysql
     ports:
       - "33306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pRootMHC@2025"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p@dminX12"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -75,7 +75,7 @@ services:
     environment:
       PMA_HOST: db
       PMA_USER: root
-      PMA_PASSWORD: "RootMHC@2025"
+      PMA_PASSWORD: "@dminX12"
       UPLOAD_LIMIT: 50M
     depends_on:
       - db

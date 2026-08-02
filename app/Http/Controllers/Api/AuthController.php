@@ -123,4 +123,55 @@ class AuthController extends Controller
 
         return $data;
     }
+
+    /**
+     * Ubah password user dari aplikasi Android.
+     * POST /api/auth/change-password
+     */
+    public function changePassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password'     => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        if (!\Illuminate\Support\Facades\Hash::check($validated['current_password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password saat ini tidak cocok.',
+            ], 422);
+        }
+
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['new_password']),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil diperbarui.',
+        ]);
+    }
+
+    /**
+     * Simpan / update FCM device token untuk push notification Android.
+     * POST /api/auth/fcm-token
+     */
+    public function updateDeviceToken(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'fcm_token' => $validated['fcm_token'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Device token FCM berhasil diperbarui.',
+        ]);
+    }
 }
