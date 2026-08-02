@@ -263,7 +263,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    private var baseUrl = "https://absensi.sekolah.sch.id/"
+    private var baseUrl = "https://absensi.smkmuthiaharapanclk.com/"
     private var token: String? = null
 
     fun setBaseUrl(url: String) {
@@ -362,7 +362,7 @@ import com.qpawdeveloper.absensimhc.ui.theme.*
 fun LoginScreen(
     onLoginSuccess: (role: String) -> Unit
 ) {
-    var baseUrl by remember { mutableStateOf("https://absensi.sekolah.sch.id") }
+    var baseUrl by remember { mutableStateOf("https://absensi.smkmuthiaharapanclk.com") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }

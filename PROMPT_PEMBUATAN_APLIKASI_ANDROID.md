@@ -1,9 +1,10 @@
 # 🚀 PROMPT MASTER & DOKUMENTASI API LENGKAP: APLIKASI ANDROID (ABSENSI QR CODE & WA)
 > **Developer:** qpawdeveloper  
+> **Production Base URL:** `https://absensi.smkmuthiaharapanclk.com`  
 > **Backend Framework:** Laravel 12 + Sanctum Bearer Token Auth  
 > **Dokumen:** All-in-One Prompt Master & RESTful API Complete Documentation
 
-Dokumen ini merupakan **Prompt Master All-in-One** yang menggabungkan panduan desain UI/UX Android modern, arsitektur modul, dan **Spesifikasi RESTful API Lengkap (JSON Payload & Response)**. Anda dapat langsung menyalin (copy-paste) seluruh isi prompt di bawah ini untuk diberikan kepada AI Coding Assistant (seperti Gemini, Claude, Cursor, ChatGPT) atau pengembang mobile.
+Dokumen ini merupakan **Prompt Master All-in-One** yang menggabungkan panduan desain UI/UX Android modern, arsitektur modul, dan **Spesifikasi RESTful API Lengkap (JSON Payload & Response)** yang terkonfigurasi untuk server CasaOS sekolah (**`https://absensi.smkmuthiaharapanclk.com`**).
 
 ---
 
@@ -13,6 +14,9 @@ Dokumen ini merupakan **Prompt Master All-in-One** yang menggabungkan panduan de
 Act as a Senior Mobile Developer & Expert UI/UX Designer.
 
 Build a complete, modern, state-of-the-art Android Application for "Sistem Absensi QR Code & Notifikasi WhatsApp Sekolah" developed by qpawdeveloper.
+
+Production Server Base URL:
+https://absensi.smkmuthiaharapanclk.com
 
 Preferred Tech Stack:
 - Native Android (Kotlin + Jetpack Compose + Material 3) OR Flutter (Dart)
@@ -40,7 +44,7 @@ Preferred Tech Stack:
 =================================================================================
 
 #### MODULE 1: AUTENTIKASI & CONFIG
-- **Server URL Setup Screen**: Input Base URL API (misal `https://absensi.sekolah.sch.id`) dengan tombol "Tes Koneksi Server".
+- **Server URL Setup Screen**: Default Base URL ke `https://absensi.smkmuthiaharapanclk.com` dengan tombol "Tes Koneksi Server".
 - **Login Screen**: Minimalist modern login form dengan toggle password visibility, logo sekolah, dan auto-save session.
 - **Token Manager**: Simpan Sanctum Bearer Token di Encrypted Storage. Otomatis redirect ke Login jika server merespons 401 Unauthorized.
 - **Change Password & Profile**: Fitur ubah password & profil user.
@@ -48,7 +52,7 @@ Preferred Tech Stack:
 #### MODULE 2: GURU / WALI KELAS
 - **Camera QR Scanner (Real-time)**:
   - Overlay scanner bundar/persegi dengan garis laser animasi scan.
-  - Saat QR Code siswa terdeteksi: Otomatis panggil API `POST /api/guru/absensi/scan`.
+  - Saat QR Code siswa terdeteksi: Otomatis panggil API `POST https://absensi.smkmuthiaharapanclk.com/api/guru/absensi/scan`.
   - Tampilkan BottomSheet / Card Dialog Popup hasil scan berisi Foto Siswa, Nama, NIS, Kelas, dan Badge Status ("HADIR TEPAT WAKTU" / "TERLAMBAT").
   - Sound effect bip & getar haptic saat scan berhasil.
 - **Presensi Manual**: Form cepat input presensi manual jika siswa tidak membawa kartu QR (Pilih Siswa -> Status: Hadir/Izin/Sakit/Alpha -> Simpan).
@@ -73,6 +77,8 @@ Preferred Tech Stack:
 =================================================================================
 🔌 3. COMPLETE RESTFUL API SPECIFICATION & JSON PAYLOADS
 =================================================================================
+
+Server Base URL: https://absensi.smkmuthiaharapanclk.com
 
 Base Headers Required for Authenticated Requests:
 Authorization: Bearer <SANCTUM_TOKEN>
@@ -103,7 +109,7 @@ A. AUTHENTICATION ENDPOINTS
          "id": 2,
          "nip": "198501012010011001",
          "nama": "Budi Santoso, S.Pd.",
-         "foto": "https://.../budi.jpg"
+         "foto": "https://absensi.smkmuthiaharapanclk.com/storage/guru/budi.jpg"
        }
      }
    }
@@ -176,7 +182,7 @@ B. GURU / WALI KELAS ENDPOINTS
        "nama": "Ahmad Rizky",
        "nis": "20241001",
        "kelas": "X RPL 1",
-       "foto_url": "https://.../siswa.jpg"
+       "foto_url": "https://absensi.smkmuthiaharapanclk.com/storage/siswa/photo.jpg"
      },
      "absensi": {
        "status": "hadir",
@@ -245,7 +251,7 @@ C. SISWA ENDPOINTS
        "id": 12,
        "nis": "20241001",
        "nama": "Ahmad Rizky",
-       "foto_url": "https://.../photo.jpg",
+       "foto_url": "https://absensi.smkmuthiaharapanclk.com/storage/siswa/photo.jpg",
        "qr_token": "8f7a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
        "kelas": {
          "id": 1,
@@ -356,19 +362,17 @@ D. ADMIN ENDPOINTS
 =================================================================================
 💻 4. KOTLIN RETROFIT CODE EXAMPLE
 =================================================================================
-// ApiService.kt
-interface ApiService {
-    @POST("api/auth/login")
-    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
-
-    @GET("api/guru/kelas")
-    suspend fun getKelasGuru(@Header("Authorization") token: String): Response<KelasListResponse>
-
-    @POST("api/guru/absensi/scan")
-    suspend fun scanQr(
-        @Header("Authorization") token: String,
-        @Body request: ScanQrRequest
-    ): Response<ScanQrResponse>
+// ApiClient.kt
+object ApiClient {
+    private const val BASE_URL = "https://absensi.smkmuthiaharapanclk.com/"
+    
+    val apiService: ApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiService::class.java)
+    }
 }
 
 Buatkan arsitektur project yang rapi (Clean Architecture / MVVM), ikuti best practices, dan pastikan kode bebas dari error/bugs!
