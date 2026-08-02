@@ -151,4 +151,32 @@ class AndroidApiTest extends TestCase
         $deleteResp->assertStatus(200)
             ->assertJson(['success' => true]);
     }
+
+    #[Test]
+    public function absensi_manual_api_guru()
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guru');
+        $token = $user->createToken('test')->plainTextToken;
+
+        $siswa = \App\Models\Siswa::factory()->create();
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/guru/absensi/manual', [
+                'siswa_id'   => $siswa->id,
+                'kelas_id'   => $siswa->kelas_id,
+                'status'     => 'hadir',
+                'keterangan' => 'Manual by Guru',
+                'tanggal'    => now()->toDateString(),
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        $this->assertDatabaseHas('absensi', [
+            'siswa_id'     => $siswa->id,
+            'status'       => 'hadir',
+            'dicatat_oleh' => $user->id,
+        ]);
+    }
 }

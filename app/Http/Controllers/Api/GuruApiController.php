@@ -215,11 +215,13 @@ class GuruApiController extends Controller
             ]
         );
 
-        // Kirim notifikasi WA
+        // Kirim notifikasi WA langsung
         try {
-            $this->absensiService->kirimNotifikasiWA($siswa, $absensi);
+            if ($siswa->no_wa_ortu) {
+                $this->absensiService->kirimNotifikasiWALangsung($absensi, $siswa);
+            }
         } catch (\Exception $e) {
-            // Log error tapi jangan gagalkan respon API
+            \Illuminate\Support\Facades\Log::error('GuruApiController::inputManual WA error: ' . $e->getMessage());
         }
 
         return response()->json([
