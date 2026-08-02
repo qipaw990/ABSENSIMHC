@@ -21,7 +21,7 @@ class LaporanController extends Controller
 
         // Tentukan kelas yang bisa dilihat
         if ($user->hasRole('guru') && $guru) {
-            $kelasList = $guru->kelasWali()->with('jurusan')->get();
+            $kelasList = $guru->getKelasAkses();
         } else {
             $kelasList = Kelas::with('jurusan')->orderBy('nama')->get();
         }

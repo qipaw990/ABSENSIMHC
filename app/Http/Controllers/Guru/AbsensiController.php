@@ -26,9 +26,9 @@ class AbsensiController extends Controller
         // Jika guru adalah wali kelas, langsung tampilkan kelasnya
         // Jika admin/super admin, tampilkan semua kelas
         if ($user->hasRole('guru') && $guru) {
-            $kelasList = $guru->kelasWali()->with('jurusan')->get();
+            $kelasList = $guru->getKelasAkses();
         } else {
-            $kelasList = Kelas::with('jurusan')->get();
+            $kelasList = Kelas::with('jurusan')->orderBy('nama')->get();
         }
 
         return view('guru.absensi.index', compact('kelasList'));

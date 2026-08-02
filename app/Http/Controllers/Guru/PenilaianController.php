@@ -21,7 +21,7 @@ class PenilaianController extends Controller
         $guru = $user->guru;
 
         if ($user->hasRole('guru') && $guru) {
-            $kelasList = $guru->kelasWali()->with('jurusan')->get();
+            $kelasList = $guru->getKelasAkses();
         } else {
             $kelasList = Kelas::with('jurusan')->orderBy('nama')->get();
         }
@@ -55,7 +55,7 @@ class PenilaianController extends Controller
         $guru = $user->guru;
 
         if ($user->hasRole('guru') && $guru) {
-            $kelasList = $guru->kelasWali()->with('jurusan')->get();
+            $kelasList = $guru->getKelasAkses();
         } else {
             $kelasList = Kelas::with('jurusan')->orderBy('nama')->get();
         }

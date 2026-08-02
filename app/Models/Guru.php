@@ -40,6 +40,18 @@ class Guru extends Model
     }
 
     /**
+     * Ambil seluruh kelas yang diakses oleh Guru (Wali Kelas + Kelas Mengajar Jadwal).
+     */
+    public function getKelasAkses()
+    {
+        $waliKelasIds   = $this->kelasWali()->pluck('id');
+        $jadwalKelasIds = $this->jadwalPelajaran()->pluck('kelas_id');
+        $allKelasIds    = $waliKelasIds->concat($jadwalKelasIds)->unique();
+
+        return Kelas::with('jurusan')->whereIn('id', $allKelasIds)->orderBy('nama')->get();
+    }
+
+    /**
      * URL foto guru. Jika tidak ada foto → SVG avatar inisial nama.
      */
     public function getFotoUrlAttribute(): string

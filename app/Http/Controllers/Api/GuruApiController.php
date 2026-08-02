@@ -25,12 +25,10 @@ class GuruApiController extends Controller
         $user = $request->user();
         $guru = $user->guru;
 
-        if ($guru) {
-            // Guru hanya dapat kelas yang menjadi wali kelasnya
-            $kelasList = $guru->kelasWali()->with('jurusan')->get();
+        if ($user->hasRole('guru') && $guru) {
+            $kelasList = $guru->getKelasAkses();
         } else {
-            // Admin/Super Admin → semua kelas
-            $kelasList = Kelas::with('jurusan')->get();
+            $kelasList = Kelas::with('jurusan')->orderBy('nama')->get();
         }
 
         $data = $kelasList->map(fn($kelas) => [
