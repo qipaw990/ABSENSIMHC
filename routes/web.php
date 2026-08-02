@@ -23,9 +23,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// RESTful API Routes (Android Mobile)
-Route::prefix('api')->group(base_path('routes/api.php'));
-
 Route::get('/', function () {
     return redirect()->route('login');
 });
