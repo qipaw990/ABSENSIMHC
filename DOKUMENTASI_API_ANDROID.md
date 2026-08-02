@@ -274,6 +274,105 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 
 ---
 
+### 7. Jadwal Mengajar Guru (GET `/api/guru/jadwal`)
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 1,
+        "hari": "Senin",
+        "jam": "07:15 - 08:45",
+        "kelas": "X RPL 1",
+        "mata_pelajaran": "Pemrograman Web",
+        "ruangan": "Lab Komputer 1"
+      }
+    ]
+  }
+  ```
+
+---
+
+### 8. Daftar Tugas & Penilaian Guru (GET `/api/guru/penilaian?kelas_id=1`)
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 10,
+        "kelas": "X RPL 1",
+        "mata_pelajaran": "Pemrograman Web",
+        "bab_materi": "Bab 1 - Dasar HTML & CSS",
+        "judul_tugas": "Tugas 1 - Layout Landing Page",
+        "jenis_label": "Tugas Harian",
+        "tanggal": "2026-08-03",
+        "total_siswa": 32,
+        "sudah_dinilai": 30
+      }
+    ]
+  }
+  ```
+
+---
+
+### 9. Detail & Entri Nilai Siswa (GET `/api/guru/penilaian/{id}`)
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "penilaian": {
+      "id": 10,
+      "kelas": "X RPL 1",
+      "mata_pelajaran": "Pemrograman Web",
+      "bab_materi": "Bab 1 - Dasar HTML & CSS",
+      "judul_tugas": "Tugas 1 - Layout Landing Page"
+    },
+    "nilai_siswa": [
+      {
+        "id": 101,
+        "siswa_id": 12,
+        "nama_siswa": "Ahmad Rizky",
+        "nis": "20241001",
+        "nilai": 88.5,
+        "catatan_guru": "Bagus, layout sangat rapi",
+        "status": "Tuntas"
+      }
+    ]
+  }
+  ```
+
+---
+
+### 10. Simpan Batch Nilai Siswa via Mobile (POST `/api/guru/penilaian/{id}/nilai-batch`)
+* **Headers**: `Authorization: Bearer <token>`
+* **Request Body**:
+  ```json
+  {
+    "nilai": {
+      "101": 88.5,
+      "102": 75.0
+    },
+    "catatan_guru": {
+      "101": "Sangat rapi",
+      "102": "Perlu diperbaiki CSS flexbox"
+    }
+  }
+  ```
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Nilai seluruh siswa berhasil diperbarui."
+  }
+  ```
+
+---
+
 ## 4. 🎓 MODUL SISWA (`/api/siswa`)
 
 ### 1. Profil & Display QR Code Siswa (GET `/api/siswa/profile`)
@@ -349,6 +448,57 @@ Siswa mengajukan surat izin/sakit dengan mengunggah foto surat dari HP.
       "keterangan": "Demam tinggi (Bukti: storage/izin_sakit/abc.jpg)",
       "tanggal": "2026-08-02"
     }
+  }
+  ```
+
+---
+
+### 4. Jadwal Pelajaran Siswa (GET `/api/siswa/jadwal`)
+Siswa melihat jadwal pelajaran mingguan kelasnya.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 1,
+        "hari": "Senin",
+        "jam": "07:15 - 08:45",
+        "mata_pelajaran": "Pemrograman Web",
+        "kode_mapel": "MP-PWPB-X",
+        "guru": "Budi Santoso, S.Pd.",
+        "ruangan": "Lab Komputer 1"
+      }
+    ]
+  }
+  ```
+
+---
+
+### 5. Nilai & Evaluasi Harian Siswa (GET `/api/siswa/nilai`)
+Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/feedback dari guru.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "rata_rata": 86.5,
+    "data": [
+      {
+        "id": 101,
+        "mata_pelajaran": "Pemrograman Web",
+        "bab_materi": "Bab 1 - Dasar HTML & CSS",
+        "judul_tugas": "Tugas 1 - Layout Landing Page",
+        "jenis_label": "Tugas Harian",
+        "tanggal": "2026-08-03",
+        "nilai": 88.5,
+        "catatan_guru": "Sangat rapi",
+        "status": "Tuntas"
+      }
+    ]
   }
   ```
 

@@ -58,6 +58,11 @@ class Kelas extends Model
         return $this->hasOne(PengaturanAbsensi::class);
     }
 
+    public function jadwalPelajaran(): HasMany
+    {
+        return $this->hasMany(JadwalPelajaran::class);
+    }
+
     /**
      * Ambil pengaturan absensi kelas ini, atau fallback ke default global.
      */

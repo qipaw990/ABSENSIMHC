@@ -493,6 +493,12 @@
             <a href="{{ route('admin.siswa.index') }}" class="nav-link {{ request()->routeIs('admin.siswa.*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i> Siswa & QR
             </a>
+            <a href="{{ route('admin.mapel.index') }}" class="nav-link {{ request()->routeIs('admin.mapel.*') ? 'active' : '' }}">
+                <i class="bi bi-book-half"></i> Mata Pelajaran
+            </a>
+            <a href="{{ route('admin.jadwal.index') }}" class="nav-link {{ request()->routeIs('admin.jadwal.*') ? 'active' : '' }}">
+                <i class="bi bi-calendar-week"></i> Jadwal Pelajaran
+            </a>
             <a href="{{ route('admin.pengaturan-absensi.index') }}" class="nav-link {{ request()->routeIs('admin.pengaturan-absensi.*') ? 'active' : '' }}">
                 <i class="bi bi-clock-history"></i> Jam Absensi
             </a>

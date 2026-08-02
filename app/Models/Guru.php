@@ -34,6 +34,11 @@ class Guru extends Model
         return $this->hasMany(Absensi::class, 'dicatat_oleh');
     }
 
+    public function jadwalPelajaran(): HasMany
+    {
+        return $this->hasMany(JadwalPelajaran::class);
+    }
+
     /**
      * URL foto guru. Jika tidak ada foto → SVG avatar inisial nama.
      */

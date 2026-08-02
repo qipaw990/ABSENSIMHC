@@ -61,6 +61,11 @@ Route::withoutMiddleware([
             Route::get('absensi/rekap/{kelas_id}', [GuruApiController::class, 'rekap']);
             Route::put('absensi/{id}',             [GuruApiController::class, 'updateAbsensi']);
             Route::delete('absensi/{id}',          [GuruApiController::class, 'deleteAbsensi']);
+            Route::get('jadwal',                   [GuruApiController::class, 'jadwal']);
+            Route::get('penilaian',                [GuruApiController::class, 'penilaianList']);
+            Route::get('penilaian/{id}',           [GuruApiController::class, 'penilaianDetail']);
+            Route::post('penilaian',               [GuruApiController::class, 'penilaianStore']);
+            Route::post('penilaian/{id}/nilai-batch', [GuruApiController::class, 'penilaianNilaiBatch']);
         });
 
         // ── Siswa ──────────────────────────────────────────────────────────────
@@ -70,6 +75,8 @@ Route::withoutMiddleware([
             Route::get('absensi',       [SiswaApiController::class, 'riwayat']);
             Route::get('absensi/stats', [SiswaApiController::class, 'stats']);
             Route::post('izin-sakit',   [SiswaApiController::class, 'pengajuanIzin']);
+            Route::get('jadwal',        [SiswaApiController::class, 'jadwal']);
+            Route::get('nilai',         [SiswaApiController::class, 'nilai']);
         });
 
         // ── Admin / Super Admin ────────────────────────────────────────────────
@@ -80,6 +87,8 @@ Route::withoutMiddleware([
             Route::get('wa-sender', [AdminApiController::class, 'waSenderList']);
             Route::get('wa-logs',   [AdminApiController::class, 'waLogsList']);
             Route::get('users',     [AdminApiController::class, 'userList']);
+            Route::get('mapel',     [AdminApiController::class, 'mapelList']);
+            Route::get('jadwal',    [AdminApiController::class, 'jadwalList']);
         });
     });
 

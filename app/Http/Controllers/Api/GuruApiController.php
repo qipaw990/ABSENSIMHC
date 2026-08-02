@@ -274,4 +274,172 @@ class GuruApiController extends Controller
             'message' => 'Data absensi berhasil dihapus.',
         ]);
     }
+
+    /**
+     * Jadwal Mengajar Guru yang Login.
+     * GET /api/guru/jadwal
+     */
+    public function jadwal(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $guru = $user->guru;
+
+        $query = \App\Models\JadwalPelajaran::with(['kelas', 'mataPelajaran']);
+
+        if ($user->hasRole('guru') && $guru) {
+            $query->where('guru_id', $guru->id);
+        }
+
+        $jadwalList = $query->orderByRaw("FIELD(hari, 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu')")
+            ->orderBy('jam_mulai')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $jadwalList->map(fn($j) => [
+                'id'            => $j->id,
+                'hari'          => $j->hari_label,
+                'jam'           => $j->jam_format,
+                'kelas'         => $j->kelas->nama ?? '-',
+                'mata_pelajaran'=> $j->mataPelajaran->nama ?? '-',
+                'ruangan'       => $j->ruangan ?? 'Kelas Reguler',
+            ]),
+        ]);
+    }
+
+    /**
+     * Daftar Penilaian & Tugas Harian oleh Guru.
+     * GET /api/guru/penilaian
+     */
+    public function penilaianList(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $guru = $user->guru;
+
+        $query = \App\Models\TugasMateri::with(['kelas', 'nilaiSiswa']);
+
+        if ($user->hasRole('guru') && $guru) {
+            $query->where('guru_id', $guru->id);
+        }
+
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+
+        $tugasList = $query->orderByDesc('tanggal')->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $tugasList->through(fn($t) => [
+                'id'             => $t->id,
+                'kelas'          => $t->kelas->nama ?? '-',
+                'mata_pelajaran' => $t->mata_pelajaran,
+                'bab_materi'     => $t->bab_materi,
+                'judul_tugas'    => $t->judul_tugas,
+                'jenis_label'    => $t->jenis_label,
+                'tanggal'        => $t->tanggal?->format('Y-m-d') ?? '-',
+                'total_siswa'    => $t->nilaiSiswa->count(),
+                'sudah_dinilai'  => $t->nilaiSiswa->where('nilai', '>', 0)->count(),
+            ]),
+        ]);
+    }
+
+    /**
+     * Detail Nilai Siswa per Tugas ID.
+     * GET /api/guru/penilaian/{id}
+     */
+    public function penilaianDetail(int $id): JsonResponse
+    {
+        $penilaian = \App\Models\TugasMateri::with(['kelas', 'nilaiSiswa.siswa'])->findOrFail($id);
+
+        return response()->json([
+            'success'   => true,
+            'penilaian' => [
+                'id'             => $penilaian->id,
+                'kelas'          => $penilaian->kelas->nama ?? '-',
+                'mata_pelajaran' => $penilaian->mata_pelajaran,
+                'bab_materi'     => $penilaian->bab_materi,
+                'judul_tugas'    => $penilaian->judul_tugas,
+                'jenis_label'    => $penilaian->jenis_label,
+                'tanggal'        => $penilaian->tanggal?->format('Y-m-d') ?? '-',
+                'keterangan'     => $penilaian->keterangan ?? '-',
+            ],
+            'nilai_siswa' => $penilaian->nilaiSiswa->sortBy('siswa.nama')->values()->map(fn($n) => [
+                'id'           => $n->id,
+                'siswa_id'     => $n->siswa_id,
+                'nama_siswa'   => $n->siswa->nama ?? '-',
+                'nis'          => $n->siswa->nis ?? '-',
+                'nilai'        => (float) $n->nilai,
+                'catatan_guru' => $n->catatan_guru ?? '',
+                'status'       => $n->nilai >= 75 ? 'Tuntas' : ($n->nilai > 0 ? 'Remidi' : 'Belum'),
+            ]),
+        ]);
+    }
+
+    /**
+     * Buat Tugas/Penilaian Baru via Mobile App.
+     * POST /api/guru/penilaian
+     */
+    public function penilaianStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'kelas_id'       => 'required|exists:kelas,id',
+            'mata_pelajaran' => 'required|string|max:255',
+            'bab_materi'     => 'required|string|max:255',
+            'judul_tugas'    => 'required|string|max:255',
+            'jenis'          => 'required|in:tugas,uh,uts,uas,praktikum',
+            'tanggal'        => 'required|date',
+            'keterangan'     => 'nullable|string',
+        ]);
+
+        $guru = $request->user()->guru;
+        $validated['guru_id'] = $guru?->id;
+
+        $tugas = \App\Models\TugasMateri::create($validated);
+
+        // Buat record nilai awal 0 untuk seluruh siswa di kelas
+        $siswaList = \App\Models\Siswa::where('kelas_id', $tugas->kelas_id)->get();
+        foreach ($siswaList as $s) {
+            \App\Models\NilaiSiswa::firstOrCreate([
+                'tugas_materi_id' => $tugas->id,
+                'siswa_id'        => $s->id,
+            ], ['nilai' => 0]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tugas/Penilaian berhasil dibuat.',
+            'data'    => $tugas,
+        ]);
+    }
+
+    /**
+     * Simpan Nilai Batch Siswa via Mobile App.
+     * POST /api/guru/penilaian/{id}/nilai-batch
+     */
+    public function penilaianNilaiBatch(Request $request, int $id): JsonResponse
+    {
+        $penilaian = \App\Models\TugasMateri::findOrFail($id);
+
+        $validated = $request->validate([
+            'nilai'          => 'required|array',
+            'catatan_guru'   => 'nullable|array',
+        ]);
+
+        foreach ($validated['nilai'] as $nilaiId => $skor) {
+            $catatan = $validated['catatan_guru'][$nilaiId] ?? null;
+
+            \App\Models\NilaiSiswa::where('id', $nilaiId)
+                ->where('tugas_materi_id', $penilaian->id)
+                ->update([
+                    'nilai'        => $skor,
+                    'catatan_guru' => $catatan,
+                ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Nilai seluruh siswa berhasil diperbarui.',
+        ]);
+    }
 }

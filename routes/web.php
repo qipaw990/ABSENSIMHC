@@ -90,6 +90,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Pengaturan Absensi per Kelas
         Route::resource('pengaturan-absensi', PengaturanAbsensiController::class);
+
+        // Data Master Mapel & Jadwal Pelajaran
+        Route::resource('mapel', \App\Http\Controllers\Admin\MapelController::class);
+        Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalPelajaranController::class);
     });
 
     // =====================================================

@@ -224,4 +224,55 @@ class AdminApiController extends Controller
             ]),
         ]);
     }
+
+    /**
+     * Data Master Mapel API.
+     * GET /api/admin/mapel
+     */
+    public function mapelList(Request $request): JsonResponse
+    {
+        $mapel = \App\Models\MataPelajaran::orderBy('kode')->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $mapel->map(fn($m) => [
+                'id'        => $m->id,
+                'kode'      => $m->kode,
+                'nama'      => $m->nama,
+                'kelompok'  => $m->kelompok_label,
+            ]),
+        ]);
+    }
+
+    /**
+     * Jadwal Pelajaran API.
+     * GET /api/admin/jadwal
+     */
+    public function jadwalList(Request $request): JsonResponse
+    {
+        $query = \App\Models\JadwalPelajaran::with(['kelas', 'mataPelajaran', 'guru']);
+
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+
+        if ($request->filled('hari')) {
+            $query->where('hari', $request->hari);
+        }
+
+        $jadwal = $query->orderBy('jam_mulai')->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $jadwal->map(fn($j) => [
+                'id'            => $j->id,
+                'kelas'         => $j->kelas->nama ?? '-',
+                'mata_pelajaran'=> $j->mataPelajaran->nama ?? '-',
+                'guru'          => $j->guru->nama ?? '-',
+                'hari'          => $j->hari_label,
+                'jam'           => $j->jam_format,
+                'ruangan'       => $j->ruangan ?? 'Kelas Reguler',
+            ]),
+        ]);
+    }
 }

@@ -233,4 +233,74 @@ class SiswaApiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Jadwal Pelajaran untuk Siswa yang Login.
+     * GET /api/siswa/jadwal
+     */
+    public function jadwal(Request $request): JsonResponse
+    {
+        $user  = $request->user();
+        $siswa = $user->siswa;
+
+        if (!$siswa) {
+            return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 404);
+        }
+
+        $jadwalList = \App\Models\JadwalPelajaran::with(['mataPelajaran', 'guru'])
+            ->where('kelas_id', $siswa->kelas_id)
+            ->orderByRaw("FIELD(hari, 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu')")
+            ->orderBy('jam_mulai')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $jadwalList->map(fn($j) => [
+                'id'            => $j->id,
+                'hari'          => $j->hari_label,
+                'jam'           => $j->jam_format,
+                'mata_pelajaran'=> $j->mataPelajaran->nama ?? '-',
+                'kode_mapel'    => $j->mataPelajaran->kode ?? '-',
+                'guru'          => $j->guru->nama ?? '-',
+                'ruangan'       => $j->ruangan ?? 'Kelas Reguler',
+            ]),
+        ]);
+    }
+
+    /**
+     * Nilai & Evaluasi Harian Siswa yang Login.
+     * GET /api/siswa/nilai
+     */
+    public function nilai(Request $request): JsonResponse
+    {
+        $user  = $request->user();
+        $siswa = $user->siswa;
+
+        if (!$siswa) {
+            return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 404);
+        }
+
+        $nilaiList = \App\Models\NilaiSiswa::with(['tugasMateri.guru'])
+            ->where('siswa_id', $siswa->id)
+            ->get()
+            ->sortByDesc(fn($n) => $n->tugasMateri->tanggal ?? now());
+
+        $rataRata = $nilaiList->avg('nilai') ?? 0;
+
+        return response()->json([
+            'success'   => true,
+            'rata_rata' => round($rataRata, 1),
+            'data'      => $nilaiList->map(fn($n) => [
+                'id'            => $n->id,
+                'mata_pelajaran'=> $n->tugasMateri->mata_pelajaran ?? '-',
+                'bab_materi'    => $n->tugasMateri->bab_materi ?? '-',
+                'judul_tugas'   => $n->tugasMateri->judul_tugas ?? '-',
+                'jenis_label'   => $n->tugasMateri->jenis_label ?? 'Tugas',
+                'tanggal'       => $n->tugasMateri->tanggal?->format('Y-m-d') ?? '-',
+                'nilai'         => (float) $n->nilai,
+                'catatan_guru'  => $n->catatan_guru ?? '-',
+                'status'        => $n->nilai >= 75 ? 'Tuntas' : ($n->nilai > 0 ? 'Remidi' : 'Belum Dinilai'),
+            ])->values(),
+        ]);
+    }
 }
