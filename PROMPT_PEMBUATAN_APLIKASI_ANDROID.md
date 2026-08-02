@@ -68,11 +68,12 @@ Preferred Tech Stack:
 - **Statistik Kehadiran**: Circular Progress Bar persentase kehadiran bulan ini & total hari masuk.
 - **Pengajuan Surat Izin / Sakit**: Form pengajuan izin/sakit dengan upload foto bukti surat dokter langsung dari Kamera/Galeri HP.
 
-#### MODULE 4: ADMIN / SUPER ADMIN
+#### MODULE 4: ADMIN / SUPER ADMIN (FULL MOBILE SUITE)
 - **Executive Dashboard**: Ringkasan total siswa, total kelas, chart 7 hari terakhir, dan statistik absensi global sekolah hari ini.
-- **Monitoring Data Siswa & Guru**: Search bar cepat untuk cari data siswa/guru.
-- **WA Sender Status Monitor**: Status live device WA Sender (`● Aktif` / `● Terputus`).
-- **Log WhatsApp**: Riwayat notifikasi WA terkirim.
+- **Monitoring & Kelola Data Siswa & Guru**: Search bar cepat cari data siswa/guru, lihat profil, NIS, NIP, dan wali kelas.
+- **WA Sender Status Monitor**: Status live device WA Sender (`● Aktif` / `● Terputus`), nomor HP sender, dan jumlah kelas terhubung.
+- **Log WhatsApp Real-time**: Riwayat notifikasi WA terkirim ke orang tua beserta status pengiriman.
+- **Full Absensi Control**: Super Admin memiliki akses penuh untuk Scan QR, Input Manual, Edit Absensi, dan Hapus Absensi.
 
 =================================================================================
 🔌 3. COMPLETE RESTFUL API SPECIFICATION & JSON PAYLOADS

@@ -57,6 +57,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Log WA
         Route::get('wa-log', [\App\Http\Controllers\SuperAdmin\WaLogController::class, 'index'])->name('wa-log.index');
+
+        // Manajemen User
+        Route::resource('user', \App\Http\Controllers\SuperAdmin\UserController::class);
+        Route::post('user/{user}/reset-password', [\App\Http\Controllers\SuperAdmin\UserController::class, 'resetPassword'])->name('user.reset-password');
     });
 
     // =====================================================

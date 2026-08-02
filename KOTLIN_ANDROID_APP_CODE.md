@@ -672,6 +672,113 @@ fun SiswaQrScreen() {
         }
     }
 }
+
+---
+
+## 8. 👑 UI SCREEN: SUPER ADMIN DASHBOARD (`ui/screens/AdminDashboardScreen.kt`)
+
+```kotlin
+package com.qpawdeveloper.absensimhc.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.qpawdeveloper.absensimhc.ui.theme.*
+
+@Composable
+fun AdminDashboardScreen() {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(20.dp)
+    ) {
+        item {
+            Text("Executive School Summary", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+            Text("Monitoring Real-Time Absensi & WA Gateway", fontSize = 13.sp, color = TextSecondary)
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        // Summary Cards
+        item {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("TOTAL SISWA", fontSize = 11.sp, color = TextSecondary)
+                        Text("720", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = EmeraldGreen)
+                    }
+                }
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("TOTAL KELAS", fontSize = 11.sp, color = TextSecondary)
+                        Text("24", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = RoyalIndigo)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Status WA Gateway Live
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = DarkCard)
+            ) {
+                Row(
+                    modifier = Modifier.padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.PhoneAndroid, contentDescription = null, tint = EmeraldGreen)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("WA Sender Official", fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Text("6281234567890 • 24 Kelas", fontSize = 12.sp, color = TextSecondary)
+                    }
+                    Badge(containerColor = EmeraldGreen) {
+                        Text("● AKTIF", color = Color.White, modifier = Modifier.padding(4.dp))
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        // Quick Actions
+        item {
+            Text("Fitur Pengelolaan Super Admin", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = {}, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = RoyalIndigo)) {
+                    Icon(Icons.Default.People, contentDescription = null)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Siswa", fontSize = 13.sp)
+                }
+                Button(onClick = {}, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = EmeraldGreen)) {
+                    Icon(Icons.Default.Person, contentDescription = null)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Guru", fontSize = 13.sp)
+                }
+            }
+        }
+    }
+}
 ```
 
 ---

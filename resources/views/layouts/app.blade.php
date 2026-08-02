@@ -461,6 +461,9 @@
             <a href="{{ route('super-admin.dashboard') }}" class="nav-link {{ request()->routeIs('super-admin.dashboard') ? 'active' : '' }}">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
+            <a href="{{ route('super-admin.user.index') }}" class="nav-link {{ request()->routeIs('super-admin.user.*') ? 'active' : '' }}">
+                <i class="bi bi-people-fill"></i> Manajemen User
+            </a>
             <a href="{{ route('super-admin.wa-sender.index') }}" class="nav-link {{ request()->routeIs('super-admin.wa-sender.*') ? 'active' : '' }}">
                 <i class="bi bi-whatsapp"></i> WA Sender
             </a>

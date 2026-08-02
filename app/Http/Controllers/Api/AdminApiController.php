@@ -190,4 +190,38 @@ class AdminApiController extends Controller
             ]),
         ]);
     }
+
+    /**
+     * User Management API.
+     * GET /api/admin/users
+     */
+    public function userList(Request $request): JsonResponse
+    {
+        $query = \App\Models\User::with('roles');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('role')) {
+            $query->role($request->role);
+        }
+
+        $users = $query->orderBy('name')->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $users->through(fn($u) => [
+                'id'         => $u->id,
+                'name'       => $u->name,
+                'email'      => $u->email,
+                'roles'      => $u->roles->pluck('name'),
+                'created_at' => $u->created_at?->format('Y-m-d H:i:s'),
+            ]),
+        ]);
+    }
 }

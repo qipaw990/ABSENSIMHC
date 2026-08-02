@@ -79,6 +79,7 @@ Route::withoutMiddleware([
             Route::get('guru',      [AdminApiController::class, 'guruList']);
             Route::get('wa-sender', [AdminApiController::class, 'waSenderList']);
             Route::get('wa-logs',   [AdminApiController::class, 'waLogsList']);
+            Route::get('users',     [AdminApiController::class, 'userList']);
         });
     });
 
