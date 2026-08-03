@@ -56,6 +56,7 @@ Preferred Tech Stack:
   - Tampilkan BottomSheet / Card Dialog Popup hasil scan berisi Foto Siswa, Nama, NIS, Kelas, dan Badge Status ("HADIR TEPAT WAKTU" / "TERLAMBAT").
   - Sound effect bip & getar haptic saat scan berhasil.
 - **Presensi Manual**: Form cepat input presensi manual jika siswa tidak membawa kartu QR (Pilih Siswa -> Status: Hadir/Izin/Sakit/Alpha -> Simpan).
+- **Edit & Hapus Absensi**: Fitur untuk Guru/Wali Kelas mengubah status/keterangan absensi siswa (`PUT /api/guru/absensi/{id}`) atau menghapus record absensi (`DELETE /api/guru/absensi/{id}`) langsung dari HP.
 - **Dashboard Kelas & Real-Time Counter**: Ringkasan jumlah siswa Hadir, Terlambat, Izin, Sakit, dan Belum Absen dalam kelas diampu.
 - **Rekap & Filter Absensi**: Filter rekap absensi per tanggal.
 

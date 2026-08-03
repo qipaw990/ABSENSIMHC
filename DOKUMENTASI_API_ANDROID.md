@@ -305,7 +305,13 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
       {
         "id": 10,
         "kelas": "X RPL 1",
+        "kelas_id": 1,
+        "guru_id": 2,
+        "guru_nama": "Budi Santoso, S.Pd.",
         "mata_pelajaran": "Pemrograman Web",
+        "mata_pelajaran_id": 3,
+        "kode_mapel": "PPLG-WEB",
+        "jadwal_pelajaran_id": 5,
         "bab_materi": "Bab 1 - Dasar HTML & CSS",
         "judul_tugas": "Tugas 1 - Layout Landing Page",
         "jenis_label": "Tugas Harian",
@@ -328,9 +334,17 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
     "penilaian": {
       "id": 10,
       "kelas": "X RPL 1",
+      "guru_id": 2,
+      "guru_nama": "Budi Santoso, S.Pd.",
       "mata_pelajaran": "Pemrograman Web",
+      "mata_pelajaran_id": 3,
+      "kode_mapel": "PPLG-WEB",
+      "jadwal_pelajaran_id": 5,
       "bab_materi": "Bab 1 - Dasar HTML & CSS",
-      "judul_tugas": "Tugas 1 - Layout Landing Page"
+      "judul_tugas": "Tugas 1 - Layout Landing Page",
+      "jenis_label": "Tugas Harian",
+      "tanggal": "2026-08-03",
+      "keterangan": "Buat layout landing page dengan CSS flexbox"
     },
     "nilai_siswa": [
       {
@@ -348,7 +362,26 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 
 ---
 
-### 10. Simpan Batch Nilai Siswa via Mobile (POST `/api/guru/penilaian/{id}/nilai-batch`)
+### 10. Buat Tugas / Penilaian Baru (POST `/api/guru/penilaian`)
+* **Headers**: `Authorization: Bearer <token>`
+* **Request Body**:
+  ```json
+  {
+    "kelas_id": 1,
+    "mata_pelajaran_id": 3,
+    "jadwal_pelajaran_id": 5,
+    "mata_pelajaran": "Pemrograman Web",
+    "bab_materi": "Bab 2 - JavaScript DOM",
+    "judul_tugas": "Tugas 2 - Event Listener",
+    "jenis": "tugas",
+    "tanggal": "2026-08-03",
+    "keterangan": "Buat fungsi button click event"
+  }
+  ```
+
+---
+
+### 11. Simpan Batch Nilai Siswa via Mobile (POST `/api/guru/penilaian/{id}/nilai-batch`)
 * **Headers**: `Authorization: Bearer <token>`
 * **Request Body**:
   ```json
@@ -490,12 +523,14 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
       {
         "id": 101,
         "mata_pelajaran": "Pemrograman Web",
+        "kode_mapel": "PPLG-WEB",
+        "guru_nama": "Budi Santoso, S.Pd.",
         "bab_materi": "Bab 1 - Dasar HTML & CSS",
         "judul_tugas": "Tugas 1 - Layout Landing Page",
         "jenis_label": "Tugas Harian",
         "tanggal": "2026-08-03",
         "nilai": 88.5,
-        "catatan_guru": "Sangat rapi",
+        "catatan_guru": "Sangat rapi, struktur HTML valid",
         "status": "Tuntas"
       }
     ]
