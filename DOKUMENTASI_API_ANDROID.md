@@ -154,17 +154,16 @@ Mengubah password user dari aplikasi Android.
 
 ---
 
-### 4. Update Profil User Lengkap (POST `/api/auth/update-profile`)
-Mengubah informasi profil user (Nama, Email, Upload Foto Avatar/Profil, No HP/WA Guru, atau No WA Ortu Siswa). Mendukung request JSON biasa maupun Multipart Form-Data jika mengunggah file foto.
+### 4. Update Profil User Lengkap & Upload Foto (POST `/api/auth/update-profile` atau `POST /api/auth/update-photo`)
+Mengubah informasi profil user (Nama, Email, Upload Foto Avatar/Profil, No HP/WA Guru, atau No WA Ortu Siswa). Mendukung rute `update-profile` maupun alias `update-photo`.
 
 * **Headers**: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data` (atau `application/json`)
 * **Request Parameters (Form-Data / JSON)**:
+  * `foto` / `photo`: File Gambar Avatar/Profil baru (`jpeg, png, jpg`, max 2MB, opsional)
   * `name`: Nama lengkap baru (opsional)
   * `email`: Email baru (opsional)
-  * `foto`: File Gambar Avatar/Profil baru (`jpeg, png, jpg`, max 2MB, opsional)
   * `no_hp` / `no_wa`: No WhatsApp baru untuk Guru (opsional)
   * `nama_ortu`: Nama Orang Tua baru untuk Siswa (opsional)
-  * `no_wa_ortu`: No WA Orang Tua baru untuk Siswa (opsional)
 * **Response 200 OK**:
   ```json
   {

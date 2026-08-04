@@ -49,6 +49,7 @@ Route::withoutMiddleware([
             Route::get('me',               [AuthController::class, 'me']);
             Route::post('change-password', [AuthController::class, 'changePassword']);
             Route::post('update-profile',  [AuthController::class, 'updateProfile']);
+            Route::post('update-photo',    [AuthController::class, 'updateProfile']);
             Route::post('fcm-token',       [AuthController::class, 'updateDeviceToken']);
         });
 
