@@ -64,6 +64,7 @@ Route::withoutMiddleware([
             Route::get('jadwal',                   [GuruApiController::class, 'jadwal']);
             Route::get('mapel',                    [GuruApiController::class, 'mapelList']);
             Route::get('penilaian/options',        [GuruApiController::class, 'penilaianOptions']);
+            Route::get('penilaian/create',         [GuruApiController::class, 'penilaianOptions']);
             Route::get('penilaian',                [GuruApiController::class, 'penilaianList']);
             Route::get('penilaian/{id}',           [GuruApiController::class, 'penilaianDetail']);
             Route::post('penilaian',               [GuruApiController::class, 'penilaianStore']);

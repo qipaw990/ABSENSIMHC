@@ -375,6 +375,7 @@ class GuruApiController extends Controller
                     'kelas_nama'        => $j->kelas->nama ?? '-',
                     'mata_pelajaran_id' => $j->mata_pelajaran_id,
                     'mata_pelajaran'    => $j->mataPelajaran->nama ?? '-',
+                    'display_label'     => ($j->hari_label ?? $j->hari) . ' (' . $j->jam_format . ') - ' . ($j->kelas->nama ?? '-') . ' - ' . ($j->mataPelajaran->nama ?? '-'),
                 ]),
                 'jenis' => $jenisOptions,
             ],
