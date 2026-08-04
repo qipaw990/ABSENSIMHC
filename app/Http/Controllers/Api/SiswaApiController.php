@@ -270,7 +270,7 @@ class SiswaApiController extends Controller
 
     /**
      * Nilai & Evaluasi Harian Siswa yang Login.
-     * GET /api/siswa/nilai
+     * GET /api/siswa/nilai?search=...&jenis=...&mapel_id=...
      */
     public function nilai(Request $request): JsonResponse
     {
@@ -281,29 +281,92 @@ class SiswaApiController extends Controller
             return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 404);
         }
 
-        $nilaiList = \App\Models\NilaiSiswa::with(['tugasMateri.guru', 'tugasMateri.mataPelajaran'])
+        $query = \App\Models\NilaiSiswa::with(['tugasMateri.guru', 'tugasMateri.mataPelajaran'])
             ->where('siswa_id', $siswa->id)
-            ->get()
-            ->sortByDesc(fn($n) => $n->tugasMateri->tanggal ?? now());
+            ->whereHas('tugasMateri', function ($q) use ($request) {
+                if ($request->filled('search')) {
+                    $search = $request->search;
+                    $q->where(function ($sub) use ($search) {
+                        $sub->where('mata_pelajaran', 'like', "%{$search}%")
+                            ->orWhere('bab_materi', 'like', "%{$search}%")
+                            ->orWhere('judul_tugas', 'like', "%{$search}%");
+                    });
+                }
+                if ($request->filled('jenis')) {
+                    $q->where('jenis', $request->jenis);
+                }
+                if ($request->filled('mapel_id')) {
+                    $q->where('mata_pelajaran_id', $request->mapel_id);
+                }
+            });
 
-        $rataRata = $nilaiList->avg('nilai') ?? 0;
+        $nilaiList = $query->get()->sortByDesc(fn($n) => $n->tugasMateri->tanggal ?? now());
+
+        $totalEvaluasi   = $nilaiList->count();
+        $dinilaiList     = $nilaiList->filter(fn($n) => (float)$n->nilai > 0);
+        $rataRata        = $nilaiList->avg('nilai') ?? 0;
+        $totalTuntas     = $nilaiList->filter(fn($n) => (float)$n->nilai >= 75)->count();
+        $totalRemidi     = $nilaiList->filter(fn($n) => (float)$n->nilai > 0 && (float)$n->nilai < 75)->count();
+        $totalBelum      = $nilaiList->filter(fn($n) => (float)$n->nilai == 0)->count();
+        $tertinggi       = $dinilaiList->max('nilai') ?? 0;
+        $terendah        = $dinilaiList->min('nilai') ?? 0;
+
+        $mappedData = $nilaiList->map(function ($n) {
+            $tm        = $n->tugasMateri;
+            $skor      = (float) $n->nilai;
+            $isTuntas  = $skor >= 75;
+            $status    = $skor >= 75 ? 'Tuntas' : ($skor > 0 ? 'Remidi' : 'Belum Dinilai');
+            $statusColor = $skor >= 75 ? '#10b981' : ($skor > 0 ? '#f59e0b' : '#6b7280');
+
+            $predikat = match (true) {
+                $skor >= 90 => 'A',
+                $skor >= 80 => 'B',
+                $skor >= 75 => 'C',
+                $skor > 0   => 'D',
+                default     => '-',
+            };
+
+            $mapelNama = !empty($tm->mata_pelajaran)
+                ? $tm->mata_pelajaran
+                : ($tm->mataPelajaran->nama ?? '-');
+
+            return [
+                'id'               => $n->id,
+                'tugas_materi_id'  => $tm->id ?? null,
+                'mata_pelajaran'   => $mapelNama,
+                'kode_mapel'       => $tm->mataPelajaran->kode ?? '-',
+                'guru_nama'        => $tm->guru->nama ?? '-',
+                'bab_materi'       => $tm->bab_materi ?? '-',
+                'judul_tugas'      => $tm->judul_tugas ?? '-',
+                'jenis'            => $tm->jenis ?? 'tugas',
+                'jenis_label'      => $tm->jenis_label ?? 'Tugas',
+                'tanggal'          => $tm->tanggal?->format('Y-m-d') ?? '-',
+                'tanggal_formatted'=> $tm->tanggal ? Carbon::parse($tm->tanggal)->translatedFormat('l, d F Y') : '-',
+                'nilai'            => $skor,
+                'nilai_formatted'  => number_format($skor, 1),
+                'kkm'              => 75,
+                'is_tuntas'        => $isTuntas,
+                'predikat'         => $predikat,
+                'status'           => $status,
+                'status_color'     => $statusColor,
+                'catatan_guru'     => $n->catatan_guru ?? '',
+            ];
+        })->values();
 
         return response()->json([
             'success'   => true,
-            'rata_rata' => round($rataRata, 1),
-            'data'      => $nilaiList->map(fn($n) => [
-                'id'            => $n->id,
-                'mata_pelajaran'=> $n->tugasMateri->mata_pelajaran ?? '-',
-                'kode_mapel'    => $n->tugasMateri->mataPelajaran->kode ?? '-',
-                'guru_nama'     => $n->tugasMateri->guru->nama ?? '-',
-                'bab_materi'    => $n->tugasMateri->bab_materi ?? '-',
-                'judul_tugas'   => $n->tugasMateri->judul_tugas ?? '-',
-                'jenis_label'   => $n->tugasMateri->jenis_label ?? 'Tugas',
-                'tanggal'       => $n->tugasMateri->tanggal?->format('Y-m-d') ?? '-',
-                'nilai'         => (float) $n->nilai,
-                'catatan_guru'  => $n->catatan_guru ?? '-',
-                'status'        => $n->nilai >= 75 ? 'Tuntas' : ($n->nilai > 0 ? 'Remidi' : 'Belum Dinilai'),
-            ])->values(),
+            'rata_rata' => round($rataRata, 1), // Untuk backward compatibility
+            'ringkasan' => [
+                'rata_rata'           => round($rataRata, 1),
+                'total_evaluasi'      => $totalEvaluasi,
+                'total_tuntas'        => $totalTuntas,
+                'total_remidi'        => $totalRemidi,
+                'total_belum_dinilai' => $totalBelum,
+                'tertinggi'           => (float) $tertinggi,
+                'terendah'            => (float) $terendah,
+                'kkm_default'         => 75,
+            ],
+            'data'      => $mappedData,
         ]);
     }
 }

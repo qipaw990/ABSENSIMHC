@@ -357,34 +357,94 @@ class GuruApiController extends Controller
      */
     public function penilaianDetail(int $id): JsonResponse
     {
-        $penilaian = \App\Models\TugasMateri::with(['kelas', 'guru', 'mataPelajaran', 'nilaiSiswa.siswa'])->findOrFail($id);
+        $penilaian = \App\Models\TugasMateri::with(['kelas', 'guru', 'mataPelajaran'])->findOrFail($id);
+
+        // Pastikan seluruh siswa di kelas tersebut punya record nilai
+        $siswaList = Siswa::where('kelas_id', $penilaian->kelas_id)->orderBy('nama')->get();
+        foreach ($siswaList as $s) {
+            \App\Models\NilaiSiswa::firstOrCreate([
+                'tugas_materi_id' => $penilaian->id,
+                'siswa_id'        => $s->id,
+            ], [
+                'nilai' => 0,
+            ]);
+        }
+
+        $nilaiList = \App\Models\NilaiSiswa::with('siswa')
+            ->where('tugas_materi_id', $penilaian->id)
+            ->get()
+            ->sortBy('siswa.nama');
+
+        $totalSiswa = $nilaiList->count();
+        $sudahDinilai = $nilaiList->filter(fn($n) => (float)$n->nilai > 0)->count();
+        $tuntasCount  = $nilaiList->filter(fn($n) => (float)$n->nilai >= 75)->count();
+        $remidiCount  = $nilaiList->filter(fn($n) => (float)$n->nilai > 0 && (float)$n->nilai < 75)->count();
+        $belumCount   = $nilaiList->filter(fn($n) => (float)$n->nilai == 0)->count();
+        $rataRata     = $nilaiList->avg('nilai') ?? 0;
+
+        $mapelNama = !empty($penilaian->mata_pelajaran)
+            ? $penilaian->mata_pelajaran
+            : ($penilaian->mataPelajaran->nama ?? '-');
 
         return response()->json([
             'success'   => true,
             'penilaian' => [
                 'id'                  => $penilaian->id,
+                'kelas_id'            => $penilaian->kelas_id,
                 'kelas'               => $penilaian->kelas->nama ?? '-',
                 'guru_id'             => $penilaian->guru_id,
                 'guru_nama'           => $penilaian->guru->nama ?? '-',
-                'mata_pelajaran'      => $penilaian->mata_pelajaran,
+                'mata_pelajaran'      => $mapelNama,
                 'mata_pelajaran_id'   => $penilaian->mata_pelajaran_id,
                 'kode_mapel'          => $penilaian->mataPelajaran->kode ?? '-',
                 'jadwal_pelajaran_id' => $penilaian->jadwal_pelajaran_id,
                 'bab_materi'          => $penilaian->bab_materi,
                 'judul_tugas'         => $penilaian->judul_tugas,
+                'jenis'               => $penilaian->jenis,
                 'jenis_label'         => $penilaian->jenis_label,
                 'tanggal'             => $penilaian->tanggal?->format('Y-m-d') ?? '-',
+                'tanggal_formatted'   => $penilaian->tanggal ? Carbon::parse($penilaian->tanggal)->translatedFormat('l, d F Y') : '-',
                 'keterangan'          => $penilaian->keterangan ?? '-',
+                'kkm'                 => 75,
             ],
-            'nilai_siswa' => $penilaian->nilaiSiswa->sortBy('siswa.nama')->values()->map(fn($n) => [
-                'id'           => $n->id,
-                'siswa_id'     => $n->siswa_id,
-                'nama_siswa'   => $n->siswa->nama ?? '-',
-                'nis'          => $n->siswa->nis ?? '-',
-                'nilai'        => (float) $n->nilai,
-                'catatan_guru' => $n->catatan_guru ?? '',
-                'status'       => $n->nilai >= 75 ? 'Tuntas' : ($n->nilai > 0 ? 'Remidi' : 'Belum'),
-            ]),
+            'ringkasan' => [
+                'total_siswa'         => $totalSiswa,
+                'sudah_dinilai'       => $sudahDinilai,
+                'tuntas_count'        => $tuntasCount,
+                'remidi_count'        => $remidiCount,
+                'belum_dinilai_count' => $belumCount,
+                'rata_rata'           => round($rataRata, 1),
+            ],
+            'nilai_siswa' => $nilaiList->values()->map(function ($n) {
+                $skor       = (float) $n->nilai;
+                $isTuntas   = $skor >= 75;
+                $status     = $skor >= 75 ? 'Tuntas' : ($skor > 0 ? 'Remidi' : 'Belum');
+                $statusColor= $skor >= 75 ? '#10b981' : ($skor > 0 ? '#f59e0b' : '#6b7280');
+
+                $predikat = match (true) {
+                    $skor >= 90 => 'A',
+                    $skor >= 80 => 'B',
+                    $skor >= 75 => 'C',
+                    $skor > 0   => 'D',
+                    default     => '-',
+                };
+
+                return [
+                    'id'           => $n->id,
+                    'siswa_id'     => $n->siswa_id,
+                    'nama_siswa'   => $n->siswa->nama ?? '-',
+                    'nis'          => $n->siswa->nis ?? '-',
+                    'foto_url'     => $n->siswa->foto_url ?? null,
+                    'nilai'        => $skor,
+                    'nilai_formatted' => number_format($skor, 1),
+                    'kkm'          => 75,
+                    'is_tuntas'    => $isTuntas,
+                    'predikat'     => $predikat,
+                    'catatan_guru' => $n->catatan_guru ?? '',
+                    'status'       => $status,
+                    'status_color' => $statusColor,
+                ];
+            }),
         ]);
     }
 
@@ -437,25 +497,83 @@ class GuruApiController extends Controller
     /**
      * Simpan Nilai Batch Siswa via Mobile App.
      * POST /api/guru/penilaian/{id}/nilai-batch
+     *
+     * Menerima format Fleksibel:
+     * Format A (Array List):
+     * {
+     *    "items": [
+     *       {"siswa_id": 12, "nilai": 88.5, "catatan_guru": "Bagus"},
+     *       {"nilai_id": 101, "nilai": 75.0, "catatan_guru": "Cukup"}
+     *    ]
+     * }
+     * Format B (Keyed Map):
+     * {
+     *    "nilai": {"101": 88.5, "102": 75.0},
+     *    "catatan_guru": {"101": "Sangat rapi"}
+     * }
      */
     public function penilaianNilaiBatch(Request $request, int $id): JsonResponse
     {
         $penilaian = \App\Models\TugasMateri::findOrFail($id);
 
-        $validated = $request->validate([
-            'nilai'          => 'required|array',
-            'catatan_guru'   => 'nullable|array',
-        ]);
+        // Opsi A: Jika mengirim key "items" berisi array of objects
+        if ($request->has('items') && is_array($request->input('items'))) {
+            $request->validate([
+                'items'                => 'required|array',
+                'items.*.nilai'        => 'required|numeric|min:0|max:100',
+                'items.*.catatan_guru' => 'nullable|string|max:255',
+            ]);
 
-        foreach ($validated['nilai'] as $nilaiId => $skor) {
-            $catatan = $validated['catatan_guru'][$nilaiId] ?? null;
+            foreach ($request->input('items') as $item) {
+                $skor    = $item['nilai'];
+                $catatan = $item['catatan_guru'] ?? null;
 
-            \App\Models\NilaiSiswa::where('id', $nilaiId)
-                ->where('tugas_materi_id', $penilaian->id)
-                ->update([
-                    'nilai'        => $skor,
-                    'catatan_guru' => $catatan,
-                ]);
+                if (!empty($item['nilai_id']) || !empty($item['id'])) {
+                    $nilaiId = $item['nilai_id'] ?? $item['id'];
+                    \App\Models\NilaiSiswa::where('id', $nilaiId)
+                        ->where('tugas_materi_id', $penilaian->id)
+                        ->update(['nilai' => $skor, 'catatan_guru' => $catatan]);
+                } elseif (!empty($item['siswa_id'])) {
+                    \App\Models\NilaiSiswa::updateOrCreate(
+                        [
+                            'tugas_materi_id' => $penilaian->id,
+                            'siswa_id'        => $item['siswa_id'],
+                        ],
+                        [
+                            'nilai'        => $skor,
+                            'catatan_guru' => $catatan,
+                        ]
+                    );
+                }
+            }
+        } else {
+            // Opsi B: Format Keyed Dictionary
+            $validated = $request->validate([
+                'nilai'        => 'required|array',
+                'catatan_guru' => 'nullable|array',
+            ]);
+
+            foreach ($validated['nilai'] as $key => $skor) {
+                $catatan = $validated['catatan_guru'][$key] ?? null;
+
+                // Coba update by nilai_siswa.id terlebih dahulu, jika gagal coba by siswa_id
+                $updated = \App\Models\NilaiSiswa::where('id', $key)
+                    ->where('tugas_materi_id', $penilaian->id)
+                    ->update(['nilai' => $skor, 'catatan_guru' => $catatan]);
+
+                if (!$updated) {
+                    \App\Models\NilaiSiswa::updateOrCreate(
+                        [
+                            'tugas_materi_id' => $penilaian->id,
+                            'siswa_id'        => $key,
+                        ],
+                        [
+                            'nilai'        => $skor,
+                            'catatan_guru' => $catatan,
+                        ]
+                    );
+                }
+            }
         }
 
         return response()->json([

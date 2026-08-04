@@ -184,6 +184,106 @@ data class ScanAbsensiData(
     @SerializedName("status_color") val statusColor: String,
     @SerializedName("jam_scan") val jamScan: String
 )
+
+// Modul Nilai Siswa & Penilaian Guru Data Models
+data class SiswaNilaiResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("rata_rata") val rataRata: Double,
+    @SerializedName("ringkasan") val ringkasan: NilaiSummary?,
+    @SerializedName("data") val data: List<NilaiItem>
+)
+
+data class NilaiSummary(
+    @SerializedName("rata_rata") val rataRata: Double,
+    @SerializedName("total_evaluasi") val totalEvaluasi: Int,
+    @SerializedName("total_tuntas") val totalTuntas: Int,
+    @SerializedName("total_remidi") val totalRemidi: Int,
+    @SerializedName("total_belum_dinilai") val totalBelumDinilai: Int,
+    @SerializedName("tertinggi") val tertinggi: Double,
+    @SerializedName("terendah") val terendah: Double,
+    @SerializedName("kkm_default") val kkmDefault: Int
+)
+
+data class NilaiItem(
+    @SerializedName("id") val id: Int,
+    @SerializedName("tugas_materi_id") val tugasMateriId: Int?,
+    @SerializedName("mata_pelajaran") val mataPelajaran: String,
+    @SerializedName("kode_mapel") val kodeMapel: String,
+    @SerializedName("guru_nama") val guruNama: String,
+    @SerializedName("bab_materi") val babMateri: String,
+    @SerializedName("judul_tugas") val judulTugas: String,
+    @SerializedName("jenis") val jenis: String,
+    @SerializedName("jenis_label") val jenisLabel: String,
+    @SerializedName("tanggal") val tanggal: String,
+    @SerializedName("tanggal_formatted") val tanggalFormatted: String,
+    @SerializedName("nilai") val nilai: Double,
+    @SerializedName("nilai_formatted") val nilaiFormatted: String,
+    @SerializedName("kkm") val kkm: Int,
+    @SerializedName("is_tuntas") val isTuntas: Boolean,
+    @SerializedName("predikat") val predikat: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("status_color") val statusColor: String,
+    @SerializedName("catatan_guru") val catatanGuru: String
+)
+
+data class PenilaianDetailResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("penilaian") val penilaian: PenilaianHeaderData?,
+    @SerializedName("ringkasan") val ringkasan: PenilaianRingkasanData?,
+    @SerializedName("nilai_siswa") val nilaiSiswa: List<PenilaianSiswaItem>
+)
+
+data class PenilaianHeaderData(
+    @SerializedName("id") val id: Int,
+    @SerializedName("kelas_id") val kelasId: Int,
+    @SerializedName("kelas") val kelas: String,
+    @SerializedName("guru_nama") val guruNama: String,
+    @SerializedName("mata_pelajaran") val mataPelajaran: String,
+    @SerializedName("kode_mapel") val kodeMapel: String,
+    @SerializedName("bab_materi") val babMateri: String,
+    @SerializedName("judul_tugas") val judulTugas: String,
+    @SerializedName("jenis") val jenis: String,
+    @SerializedName("jenis_label") val jenisLabel: String,
+    @SerializedName("tanggal") val tanggal: String,
+    @SerializedName("tanggal_formatted") val tanggalFormatted: String,
+    @SerializedName("keterangan") val keterangan: String,
+    @SerializedName("kkm") val kkm: Int
+)
+
+data class PenilaianRingkasanData(
+    @SerializedName("total_siswa") val totalSiswa: Int,
+    @SerializedName("sudah_dinilai") val sudahDinilai: Int,
+    @SerializedName("tuntas_count") val tuntasCount: Int,
+    @SerializedName("remidi_count") val remidiCount: Int,
+    @SerializedName("belum_dinilai_count") val belumDinilaiCount: Int,
+    @SerializedName("rata_rata") val rataRata: Double
+)
+
+data class PenilaianSiswaItem(
+    @SerializedName("id") val id: Int,
+    @SerializedName("siswa_id") val siswaId: Int,
+    @SerializedName("nama_siswa") val namaSiswa: String,
+    @SerializedName("nis") val nis: String,
+    @SerializedName("foto_url") val fotoUrl: String?,
+    @SerializedName("nilai") val nilai: Double,
+    @SerializedName("nilai_formatted") val nilaiFormatted: String,
+    @SerializedName("kkm") val kkm: Int,
+    @SerializedName("is_tuntas") val isTuntas: Boolean,
+    @SerializedName("predikat") val predikat: String,
+    @SerializedName("catatan_guru") val catatanGuru: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("status_color") val statusColor: String
+)
+
+data class BatchNilaiRequest(
+    @SerializedName("items") val items: List<BatchNilaiItem>
+)
+
+data class BatchNilaiItem(
+    @SerializedName("siswa_id") val siswaId: Int,
+    @SerializedName("nilai") val nilai: Double,
+    @SerializedName("catatan_guru") val catatanGuru: String? = null
+)
 ```
 
 ---
@@ -220,9 +320,27 @@ interface ApiService {
         @Body request: ScanQrRequest
     ): Response<ScanQrResponse>
 
+    @GET("api/guru/penilaian/{id}")
+    suspend fun getPenilaianDetail(
+        @Path("id") id: Int
+    ): Response<PenilaianDetailResponse>
+
+    @POST("api/guru/penilaian/{id}/nilai-batch")
+    suspend fun submitBatchNilai(
+        @Path("id") id: Int,
+        @Body request: BatchNilaiRequest
+    ): Response<GenericResponse<Unit>>
+
     // Siswa Endpoints
     @GET("api/siswa/profile")
     suspend fun getSiswaProfile(): Response<SiswaProfileResponse>
+
+    @GET("api/siswa/nilai")
+    suspend fun getNilaiSiswa(
+        @Query("search") search: String? = null,
+        @Query("jenis") jenis: String? = null,
+        @Query("mapel_id") mapelId: Int? = null
+    ): Response<SiswaNilaiResponse>
 }
 
 data class GenericResponse<T>(
@@ -783,4 +901,352 @@ fun AdminDashboardScreen() {
 
 ---
 
+## 9. 📊 UI SCREEN: SISWA NILAI & EVALUASI (`ui/screens/SiswaNilaiScreen.kt`)
+
+```kotlin
+package com.qpawdeveloper.absensimhc.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.qpawdeveloper.absensimhc.data.model.NilaiItem
+import com.qpawdeveloper.absensimhc.data.model.NilaiSummary
+import com.qpawdeveloper.absensimhc.ui.theme.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SiswaNilaiScreen(
+    summary: NilaiSummary?,
+    nilaiList: List<NilaiItem>,
+    onRefresh: () -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredList = remember(searchQuery, nilaiList) {
+        if (searchQuery.isBlank()) nilaiList
+        else nilaiList.filter {
+            it.mataPelajaran.contains(searchQuery, ignoreCase = true) ||
+            it.babMateri.contains(searchQuery, ignoreCase = true) ||
+            it.judulTugas.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Header Screen Title
+        item {
+            Column {
+                Text("Nilai & Evaluasi Pembelajaran", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("Transkrip nilai harian, ulangan, dan catatan dari guru pengampu", fontSize = 13.sp, color = TextSecondary)
+            }
+        }
+
+        // Summary Header Statistics Cards
+        item {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Card Rata-Rata
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("RATA-RATA", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = String.format("%.1f", summary?.rataRata ?: 0.0),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = EmeraldGreen
+                        )
+                        Text("${summary?.totalEvaluasi ?: 0} Tugas", fontSize = 11.sp, color = TextSecondary)
+                    }
+                }
+
+                // Card Tuntas
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("TUNTAS (>=75)", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "${summary?.totalTuntas ?: 0}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = RoyalIndigo
+                        )
+                        Text("Lulus KKM", fontSize = 11.sp, color = TextSecondary)
+                    }
+                }
+
+                // Card Remidi
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("REMIDI (<75)", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "${summary?.totalRemidi ?: 0}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AmberWarning
+                        )
+                        Text("Perlu Perbaikan", fontSize = 11.sp, color = TextSecondary)
+                    }
+                }
+            }
+        }
+
+        // Search Field
+        item {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Cari Mapel, Bab, atau Judul Tugas...", color = TextSecondary, fontSize = 13.sp) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = RoyalIndigo) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = RoyalIndigo,
+                    unfocusedBorderColor = DarkCard
+                )
+            )
+        }
+
+        // List of Grades Card
+        items(filteredList) { item ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = DarkCard)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(item.mataPelajaran, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text("${item.babMateri} • ${item.guruNama}", fontSize = 12.sp, color = TextSecondary)
+                        }
+
+                        // Badge Skor Nilai & Status
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = item.nilaiFormatted,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (item.isTuntas) EmeraldGreen else AmberWarning
+                            )
+                            Badge(
+                                containerColor = if (item.isTuntas) EmeraldGreen else AmberWarning
+                            ) {
+                                Text(
+                                    text = "${item.status} (${item.predikat})",
+                                    color = Color.White,
+                                    fontSize = 10.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider(color = DarkBackground.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(item.judulTugas, fontSize = 13.sp, color = TextPrimary, fontWeight = FontWeight.Medium)
+                        Text(item.tanggalFormatted, fontSize = 11.sp, color = TextSecondary)
+                    }
+
+                    if (item.catatanGuru.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(DarkBackground, RoundedCornerShape(8.dp))
+                                .padding(10.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Comment, contentDescription = null, tint = RoyalIndigo, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Catatan Guru: ${item.catatanGuru}",
+                                    fontSize = 12.sp,
+                                    color = TextPrimary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+## 10. 📝 UI SCREEN: GURU BATCH PENILAIAN (`ui/screens/GuruPenilaianDetailScreen.kt`)
+
+```kotlin
+package com.qpawdeveloper.absensimhc.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.qpawdeveloper.absensimhc.data.model.BatchNilaiItem
+import com.qpawdeveloper.absensimhc.data.model.PenilaianHeaderData
+import com.qpawdeveloper.absensimhc.data.model.PenilaianSiswaItem
+import com.qpawdeveloper.absensimhc.ui.theme.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GuruPenilaianDetailScreen(
+    header: PenilaianHeaderData?,
+    initialSiswaList: List<PenilaianSiswaItem>,
+    onSubmitBatch: (List<BatchNilaiItem>) -> Unit
+) {
+    // Local state map for dynamic editing
+    val nilaiMap = remember { mutableStateMapOf<Int, String>() }
+    val catatanMap = remember { mutableStateMapOf<Int, String>() }
+
+    LaunchedEffect(initialSiswaList) {
+        initialSiswaList.forEach {
+            nilaiMap[it.siswaId] = if (it.nilai > 0) it.nilai.toString() else ""
+            catatanMap[it.siswaId] = it.catatanGuru
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(DarkBackground)) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(bottom = 70.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(header?.mataPelajaran ?: "Penilaian Kelas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Text("${header?.kelas ?: "-"} • ${header?.judulTugas ?: "-"}", fontSize = 13.sp, color = RoyalIndigo)
+                        Text(header?.babMateri ?: "-", fontSize = 12.sp, color = TextSecondary)
+                    }
+                }
+            }
+
+            itemsIndexed(initialSiswaList) { index, siswa ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("${index + 1}. ${siswa.namaSiswa}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text("NIS: ${siswa.nis}", fontSize = 12.sp, color = TextSecondary)
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            OutlinedTextField(
+                                value = catatanMap[siswa.siswaId] ?: "",
+                                onValueChange = { catatanMap[siswa.siswaId] = it },
+                                placeholder = { Text("Catatan / Feedback Guru...", fontSize = 11.sp) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(0.95f),
+                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = RoyalIndigo)
+                            )
+                        }
+
+                        // Field Input Nilai
+                        OutlinedTextField(
+                            value = nilaiMap[siswa.siswaId] ?: "",
+                            onValueChange = { nilaiMap[siswa.siswaId] = it },
+                            label = { Text("Nilai") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.width(80.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = RoyalIndigo,
+                                unfocusedBorderColor = TextSecondary
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        // Floating Save Button
+        Button(
+            onClick = {
+                val batchItems = initialSiswaList.map { s ->
+                    val skor = nilaiMap[s.siswaId]?.toDoubleOrNull() ?: 0.0
+                    val note = catatanMap[s.siswaId]
+                    BatchNilaiItem(siswaId = s.siswaId, nilai = skor, catatanGuru = note)
+                }
+                onSubmitBatch(batchItems)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = EmeraldGreen)
+        ) {
+            Icon(Icons.Default.Save, contentDescription = null, tint = Color.White)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("SIMPAN SELURUH NILAI", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+    }
+}
+```
+
+---
+
 *Kode Sumber Kotlin Native — Developed by **qpawdeveloper**.*
+

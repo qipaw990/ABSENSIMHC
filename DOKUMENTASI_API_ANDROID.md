@@ -333,6 +333,7 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
     "success": true,
     "penilaian": {
       "id": 10,
+      "kelas_id": 1,
       "kelas": "X RPL 1",
       "guru_id": 2,
       "guru_nama": "Budi Santoso, S.Pd.",
@@ -342,9 +343,20 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
       "jadwal_pelajaran_id": 5,
       "bab_materi": "Bab 1 - Dasar HTML & CSS",
       "judul_tugas": "Tugas 1 - Layout Landing Page",
+      "jenis": "tugas",
       "jenis_label": "Tugas Harian",
       "tanggal": "2026-08-03",
-      "keterangan": "Buat layout landing page dengan CSS flexbox"
+      "tanggal_formatted": "Senin, 03 Agustus 2026",
+      "keterangan": "Buat layout landing page dengan CSS flexbox",
+      "kkm": 75
+    },
+    "ringkasan": {
+      "total_siswa": 32,
+      "sudah_dinilai": 30,
+      "tuntas_count": 28,
+      "remidi_count": 2,
+      "belum_dinilai_count": 2,
+      "rata_rata": 84.5
     },
     "nilai_siswa": [
       {
@@ -352,9 +364,15 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
         "siswa_id": 12,
         "nama_siswa": "Ahmad Rizky",
         "nis": "20241001",
+        "foto_url": "https://.../photo.jpg",
         "nilai": 88.5,
+        "nilai_formatted": "88.5",
+        "kkm": 75,
+        "is_tuntas": true,
+        "predikat": "B",
         "catatan_guru": "Bagus, layout sangat rapi",
-        "status": "Tuntas"
+        "status": "Tuntas",
+        "status_color": "#10b981"
       }
     ]
   }
@@ -382,8 +400,27 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 ---
 
 ### 11. Simpan Batch Nilai Siswa via Mobile (POST `/api/guru/penilaian/{id}/nilai-batch`)
+API ini fleksibel mendukung 2 opsi format data JSON dari aplikasi Android:
+
 * **Headers**: `Authorization: Bearer <token>`
-* **Request Body**:
+* **Request Body (Opsi A — Recommended for Mobile List App)**:
+  ```json
+  {
+    "items": [
+      {
+        "siswa_id": 12,
+        "nilai": 88.5,
+        "catatan_guru": "Sangat rapi"
+      },
+      {
+        "siswa_id": 13,
+        "nilai": 75.0,
+        "catatan_guru": "Cukup baik"
+      }
+    ]
+  }
+  ```
+* **Request Body (Opsi B — Keyed Dictionary Map)**:
   ```json
   {
     "nilai": {
@@ -514,24 +551,46 @@ Siswa melihat jadwal pelajaran mingguan kelasnya.
 Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/feedback dari guru.
 
 * **Headers**: `Authorization: Bearer <token>`
+* **Query Parameters (Opsional)**:
+  * `search`: `Pemrograman` (mencari berdasarkan nama mapel, bab materi, atau judul tugas)
+  * `jenis`: `uh` (pilihan: `tugas`, `uh`, `uts`, `uas`, `praktikum`)
+  * `mapel_id`: `3` (filter spesifik ID mata pelajaran)
 * **Response 200 OK**:
   ```json
   {
     "success": true,
     "rata_rata": 86.5,
+    "ringkasan": {
+      "rata_rata": 86.5,
+      "total_evaluasi": 12,
+      "total_tuntas": 10,
+      "total_remidi": 2,
+      "total_belum_dinilai": 0,
+      "tertinggi": 98.0,
+      "terendah": 65.0,
+      "kkm_default": 75
+    },
     "data": [
       {
         "id": 101,
+        "tugas_materi_id": 10,
         "mata_pelajaran": "Pemrograman Web",
         "kode_mapel": "PPLG-WEB",
         "guru_nama": "Budi Santoso, S.Pd.",
         "bab_materi": "Bab 1 - Dasar HTML & CSS",
         "judul_tugas": "Tugas 1 - Layout Landing Page",
+        "jenis": "tugas",
         "jenis_label": "Tugas Harian",
         "tanggal": "2026-08-03",
+        "tanggal_formatted": "Senin, 03 Agustus 2026",
         "nilai": 88.5,
-        "catatan_guru": "Sangat rapi, struktur HTML valid",
-        "status": "Tuntas"
+        "nilai_formatted": "88.5",
+        "kkm": 75,
+        "is_tuntas": true,
+        "predikat": "B",
+        "status": "Tuntas",
+        "status_color": "#10b981",
+        "catatan_guru": "Sangat rapi, struktur HTML valid"
       }
     ]
   }
