@@ -57,6 +57,10 @@ Preferred Tech Stack:
   - Sound effect bip & getar haptic saat scan berhasil.
 - **Presensi Manual**: Form cepat input presensi manual jika siswa tidak membawa kartu QR (Pilih Siswa -> Status: Hadir/Izin/Sakit/Alpha -> Simpan).
 - **Edit & Hapus Absensi**: Fitur untuk Guru/Wali Kelas mengubah status/keterangan absensi siswa (`PUT /api/guru/absensi/{id}`) atau menghapus record absensi (`DELETE /api/guru/absensi/{id}`) langsung dari HP.
+- **Penilaian & Batch Entri Nilai Siswa**:
+  - Daftar tugas/materi per kelas (`GET /api/guru/penilaian`).
+  - Detail tugas & form input batch nilai siswa (`GET /api/guru/penilaian/{id}`) dilengkapi status Tuntas/Remidi dan field catatan feedback guru.
+  - Simpan Batch Nilai 1-Klik (`POST /api/guru/penilaian/{id}/nilai-batch`).
 - **Dashboard Kelas & Real-Time Counter**: Ringkasan jumlah siswa Hadir, Terlambat, Izin, Sakit, dan Belum Absen dalam kelas diampu.
 - **Rekap & Filter Absensi**: Filter rekap absensi per tanggal.
 
@@ -67,6 +71,11 @@ Preferred Tech Stack:
 - **Live Status Card Hari Ini**: Banner status kehadiran hari ini ("Anda Sudah Hadir Pukul 06:55 WIB").
 - **Riwayat Kehadiran 30 Hari**: Card list riwayat absensi dengan indikator warna status.
 - **Statistik Kehadiran**: Circular Progress Bar persentase kehadiran bulan ini & total hari masuk.
+- **Nilai & Evaluasi Harian**:
+  - Transkrip nilai tugas, bab materi, dan ulangan (`GET /api/siswa/nilai`).
+  - Ringkasan statistik di header screen: Rata-Rata Nilai, Total Tugas Tuntas (&ge;75), Total Remidi (&lt;75), Tertinggi, dan Terendah.
+  - Search bar cepat pencarian berdasarkan Mapel, Bab Materi, atau Judul Tugas.
+  - Card item nilai dilengkapi Badge Status ("Tuntas (B)" / "Remidi (D)"), KKM, dan Catatan/Feedback dari Guru.
 - **Pengajuan Surat Izin / Sakit**: Form pengajuan izin/sakit dengan upload foto bukti surat dokter langsung dari Kamera/Galeri HP.
 
 #### MODULE 4: ADMIN / SUPER ADMIN (FULL MOBILE SUITE)
@@ -242,6 +251,74 @@ B. GURU / WALI KELAS ENDPOINTS
      }
    }
 
+5. Detail Penilaian & Entri Nilai Siswa (GET /api/guru/penilaian/{id})
+   Response 200 OK:
+   {
+     "success": true,
+     "penilaian": {
+       "id": 10,
+       "kelas_id": 1,
+       "kelas": "X RPL 1",
+       "guru_nama": "Budi Santoso, S.Pd.",
+       "mata_pelajaran": "Pemrograman Web",
+       "kode_mapel": "PPLG-WEB",
+       "bab_materi": "Bab 1 - Dasar HTML & CSS",
+       "judul_tugas": "Tugas 1 - Layout Landing Page",
+       "jenis": "tugas",
+       "jenis_label": "Tugas Harian",
+       "tanggal": "2026-08-03",
+       "tanggal_formatted": "Senin, 03 Agustus 2026",
+       "kkm": 75
+     },
+     "ringkasan": {
+       "total_siswa": 32,
+       "sudah_dinilai": 30,
+       "tuntas_count": 28,
+       "remidi_count": 2,
+       "belum_dinilai_count": 2,
+       "rata_rata": 84.5
+     },
+     "nilai_siswa": [
+       {
+         "id": 101,
+         "siswa_id": 12,
+         "nama_siswa": "Ahmad Rizky",
+         "nis": "20241001",
+         "foto_url": "https://absensi.smkmuthiaharapanclk.com/storage/siswa/photo.jpg",
+         "nilai": 88.5,
+         "nilai_formatted": "88.5",
+         "kkm": 75,
+         "is_tuntas": true,
+         "predikat": "B",
+         "catatan_guru": "Bagus, layout sangat rapi",
+         "status": "Tuntas",
+         "status_color": "#10b981"
+       }
+     ]
+   }
+
+6. Simpan Batch Nilai Siswa (POST /api/guru/penilaian/{id}/nilai-batch)
+   Request Body (Format Array List):
+   {
+     "items": [
+       {
+         "siswa_id": 12,
+         "nilai": 88.5,
+         "catatan_guru": "Sangat rapi"
+       },
+       {
+         "siswa_id": 13,
+         "nilai": 75.0,
+         "catatan_guru": "Cukup baik"
+       }
+     ]
+   }
+   Response 200 OK:
+   {
+     "success": true,
+     "message": "Nilai seluruh siswa berhasil diperbarui."
+   }
+
 ---------------------------------------------------------------------------------
 C. SISWA ENDPOINTS
 ---------------------------------------------------------------------------------
@@ -294,7 +371,47 @@ C. SISWA ENDPOINTS
      ]
    }
 
-4. Statistik Kehadiran Siswa (GET /api/siswa/absensi/stats)
+4. Nilai & Evaluasi Harian Siswa (GET /api/siswa/nilai?search=...&jenis=...&mapel_id=...)
+   Response 200 OK:
+   {
+     "success": true,
+     "rata_rata": 86.5,
+     "ringkasan": {
+       "rata_rata": 86.5,
+       "total_evaluasi": 12,
+       "total_tuntas": 10,
+       "total_remidi": 2,
+       "total_belum_dinilai": 0,
+       "tertinggi": 98.0,
+       "terendah": 65.0,
+       "kkm_default": 75
+     },
+     "data": [
+       {
+         "id": 101,
+         "tugas_materi_id": 10,
+         "mata_pelajaran": "Pemrograman Web",
+         "kode_mapel": "PPLG-WEB",
+         "guru_nama": "Budi Santoso, S.Pd.",
+         "bab_materi": "Bab 1 - Dasar HTML & CSS",
+         "judul_tugas": "Tugas 1 - Layout Landing Page",
+         "jenis": "tugas",
+         "jenis_label": "Tugas Harian",
+         "tanggal": "2026-08-03",
+         "tanggal_formatted": "Senin, 03 Agustus 2026",
+         "nilai": 88.5,
+         "nilai_formatted": "88.5",
+         "kkm": 75,
+         "is_tuntas": true,
+         "predikat": "B",
+         "status": "Tuntas",
+         "status_color": "#10b981",
+         "catatan_guru": "Sangat rapi, struktur HTML valid"
+       }
+     ]
+   }
+
+5. Statistik Kehadiran Siswa (GET /api/siswa/absensi/stats)
    Response 200 OK:
    {
      "success": true,
@@ -304,7 +421,7 @@ C. SISWA ENDPOINTS
      "total_hari": 188
    }
 
-5. Pengajuan Izin / Sakit (POST /api/siswa/izin-sakit)
+6. Pengajuan Izin / Sakit (POST /api/siswa/izin-sakit)
    Header: Content-Type: multipart/form-data
    Form Data Params:
    - status: "sakit" (atau "izin")
@@ -379,6 +496,11 @@ object ApiClient {
 
 Buatkan arsitektur project yang rapi (Clean Architecture / MVVM), ikuti best practices, dan pastikan kode bebas dari error/bugs!
 ```
+
+---
+
+*ALL-IN-ONE PROMPT MASTER — Developed by **qpawdeveloper**.*
+
 
 ---
 

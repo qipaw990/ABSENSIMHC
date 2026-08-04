@@ -35,8 +35,9 @@ class DatabaseSeeder extends Seeder
             PengaturanAbsensiSeeder::class, // Jam masuk & tutup absensi
             WaSenderSeeder::class,          // Kosong (dikonfigurasi manual)
 
-            // ─── STEP 5: Data Demo (kosong) ────────────────────────────────
+            // ─── STEP 5: Data Demo & Nilai ─────────────────────────────────
             AbsensiSeeder::class,           // Kosong
+            DemoPenilaianSeeder::class,     // Data demo guru, siswa, mapel, tugas, dan nilai
         ]);
 
         $this->command->newLine();

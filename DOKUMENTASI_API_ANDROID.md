@@ -301,6 +301,7 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
   ```json
   {
     "success": true,
+    "total": 5,
     "data": [
       {
         "id": 10,
@@ -314,12 +315,20 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
         "jadwal_pelajaran_id": 5,
         "bab_materi": "Bab 1 - Dasar HTML & CSS",
         "judul_tugas": "Tugas 1 - Layout Landing Page",
+        "jenis": "tugas",
         "jenis_label": "Tugas Harian",
         "tanggal": "2026-08-03",
+        "tanggal_formatted": "Senin, 03 Agustus 2026",
         "total_siswa": 32,
         "sudah_dinilai": 30
       }
-    ]
+    ],
+    "pagination": {
+      "current_page": 1,
+      "last_page": 1,
+      "per_page": 20,
+      "total": 5
+    }
   }
   ```
 

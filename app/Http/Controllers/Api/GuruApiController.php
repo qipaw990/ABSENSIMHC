@@ -319,35 +319,62 @@ class GuruApiController extends Controller
 
         $query = \App\Models\TugasMateri::with(['kelas', 'guru', 'mataPelajaran', 'nilaiSiswa']);
 
-        if ($user->hasRole('guru') && $guru) {
-            $query->where('guru_id', $guru->id);
-        }
-
         if ($request->filled('kelas_id')) {
             $query->where('kelas_id', $request->kelas_id);
+        } elseif ($user->hasRole('guru') && $guru) {
+            $query->where(function ($q) use ($guru) {
+                $q->where('guru_id', $guru->id)
+                  ->orWhereNull('guru_id');
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('mata_pelajaran', 'like', "%{$search}%")
+                  ->orWhere('bab_materi', 'like', "%{$search}%")
+                  ->orWhere('judul_tugas', 'like', "%{$search}%");
+            });
         }
 
         $tugasList = $query->orderByDesc('tanggal')->paginate(20);
 
-        return response()->json([
-            'success' => true,
-            'data'    => $tugasList->through(fn($t) => [
+        $mappedItems = collect($tugasList->items())->map(function ($t) {
+            $mapelNama = !empty($t->mata_pelajaran)
+                ? $t->mata_pelajaran
+                : ($t->mataPelajaran->nama ?? '-');
+
+            return [
                 'id'                  => $t->id,
                 'kelas'               => $t->kelas->nama ?? '-',
                 'kelas_id'            => $t->kelas_id,
                 'guru_id'             => $t->guru_id,
                 'guru_nama'           => $t->guru->nama ?? '-',
-                'mata_pelajaran'      => $t->mata_pelajaran,
+                'mata_pelajaran'      => $mapelNama,
                 'mata_pelajaran_id'   => $t->mata_pelajaran_id,
                 'kode_mapel'          => $t->mataPelajaran->kode ?? '-',
                 'jadwal_pelajaran_id' => $t->jadwal_pelajaran_id,
                 'bab_materi'          => $t->bab_materi,
                 'judul_tugas'         => $t->judul_tugas,
+                'jenis'               => $t->jenis,
                 'jenis_label'         => $t->jenis_label,
                 'tanggal'             => $t->tanggal?->format('Y-m-d') ?? '-',
+                'tanggal_formatted'   => $t->tanggal ? Carbon::parse($t->tanggal)->translatedFormat('l, d F Y') : '-',
                 'total_siswa'         => $t->nilaiSiswa->count(),
                 'sudah_dinilai'       => $t->nilaiSiswa->where('nilai', '>', 0)->count(),
-            ]),
+            ];
+        })->values();
+
+        return response()->json([
+            'success'    => true,
+            'total'      => $tugasList->total(),
+            'data'       => $mappedItems,
+            'pagination' => [
+                'current_page' => $tugasList->currentPage(),
+                'last_page'    => $tugasList->lastPage(),
+                'per_page'     => $tugasList->perPage(),
+                'total'        => $tugasList->total(),
+            ],
         ]);
     }
 
