@@ -154,7 +154,41 @@ Mengubah password user dari aplikasi Android.
 
 ---
 
-### 4. Update FCM Device Token (POST `/api/auth/fcm-token`)
+### 4. Update Profil User Lengkap (POST `/api/auth/update-profile`)
+Mengubah informasi profil user (Nama, Email, Upload Foto Avatar/Profil, No HP/WA Guru, atau No WA Ortu Siswa). Mendukung request JSON biasa maupun Multipart Form-Data jika mengunggah file foto.
+
+* **Headers**: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data` (atau `application/json`)
+* **Request Parameters (Form-Data / JSON)**:
+  * `name`: Nama lengkap baru (opsional)
+  * `email`: Email baru (opsional)
+  * `foto`: File Gambar Avatar/Profil baru (`jpeg, png, jpg`, max 2MB, opsional)
+  * `no_hp` / `no_wa`: No WhatsApp baru untuk Guru (opsional)
+  * `nama_ortu`: Nama Orang Tua baru untuk Siswa (opsional)
+  * `no_wa_ortu`: No WA Orang Tua baru untuk Siswa (opsional)
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Profil berhasil diperbarui.",
+    "user": {
+      "id": 5,
+      "name": "Budi Santoso, S.Pd., M.T.",
+      "email": "budi.santoso@sekolah.sch.id",
+      "role": "guru",
+      "roles": ["guru"],
+      "guru": {
+        "id": 2,
+        "nip": "198501012010011001",
+        "nama": "Budi Santoso, S.Pd., M.T.",
+        "foto": "http://IP_SERVER:8585/storage/guru/profile_budi.jpg"
+      }
+    }
+  }
+  ```
+
+---
+
+### 5. Update FCM Device Token (POST `/api/auth/fcm-token`)
 Mendaftarkan atau memperbarui Firebase Cloud Messaging (FCM) token HP Android untuk menerima Notifikasi Push.
 
 * **Headers**: `Authorization: Bearer <token>`

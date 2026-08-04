@@ -106,13 +106,15 @@ class AuthController extends Controller
             $siswa = $user->siswa()->with('kelas.jurusan')->first();
             if ($siswa) {
                 $data['siswa'] = [
-                    'id'        => $siswa->id,
-                    'nis'       => $siswa->nis,
-                    'nisn'      => $siswa->nisn,
-                    'nama'      => $siswa->nama,
-                    'foto'      => $siswa->foto_url,
-                    'qr_token'  => $siswa->qr_token,
-                    'kelas'     => $siswa->kelas ? [
+                    'id'         => $siswa->id,
+                    'nis'        => $siswa->nis,
+                    'nisn'       => $siswa->nisn,
+                    'nama'       => $siswa->nama,
+                    'nama_ortu'  => $siswa->nama_ortu ?? null,
+                    'no_wa_ortu' => $siswa->no_wa_ortu ?? null,
+                    'foto'       => $siswa->foto_url,
+                    'qr_token'   => $siswa->qr_token,
+                    'kelas'      => $siswa->kelas ? [
                         'id'      => $siswa->kelas->id,
                         'nama'    => $siswa->kelas->nama,
                         'jurusan' => $siswa->kelas->jurusan->nama ?? null,
@@ -151,6 +153,81 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Password berhasil diperbarui.',
+        ]);
+    }
+
+    /**
+     * Update Profil User Lengkap (Nama, Email, Foto Profil, No HP/WA).
+     * POST /api/auth/update-profile
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name'       => 'nullable|string|max:255',
+            'email'      => "nullable|email|unique:users,email,{$user->id}",
+            'foto'       => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'no_hp'      => 'nullable|string|max:30',
+            'no_wa'      => 'nullable|string|max:30',
+            'nama_ortu'  => 'nullable|string|max:255',
+            'no_wa_ortu' => 'nullable|string|max:30',
+        ]);
+
+        if (!empty($validated['name'])) {
+            $user->name = $validated['name'];
+        }
+
+        if (!empty($validated['email'])) {
+            $user->email = $validated['email'];
+        }
+
+        $user->save();
+
+        // Update profil Guru
+        if ($user->hasRole('guru') || $user->hasRole('admin')) {
+            $guru = $user->guru;
+            if ($guru) {
+                if (!empty($validated['name'])) {
+                    $guru->nama = $validated['name'];
+                }
+                $noHp = $validated['no_hp'] ?? $validated['no_wa'] ?? null;
+                if (!empty($noHp)) {
+                    $guru->no_wa = $noHp;
+                }
+                if ($request->hasFile('foto')) {
+                    $fotoPath = $request->file('foto')->store('guru', 'public');
+                    $guru->foto = $fotoPath;
+                }
+                $guru->save();
+            }
+        }
+
+        // Update profil Siswa
+        if ($user->hasRole('siswa')) {
+            $siswa = $user->siswa;
+            if ($siswa) {
+                if (!empty($validated['name'])) {
+                    $siswa->nama = $validated['name'];
+                }
+                if (!empty($validated['nama_ortu'])) {
+                    $siswa->nama_ortu = $validated['nama_ortu'];
+                }
+                if (!empty($validated['no_wa_ortu'])) {
+                    $siswa->no_wa_ortu = $validated['no_wa_ortu'];
+                }
+                if ($request->hasFile('foto')) {
+                    $fotoPath = $request->file('foto')->store('siswa', 'public');
+                    $siswa->foto = $fotoPath;
+                }
+                $siswa->save();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui.',
+            'user'    => $this->buildProfile($user->fresh()),
         ]);
     }
 
