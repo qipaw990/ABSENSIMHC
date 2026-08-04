@@ -396,13 +396,31 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
   {
     "kelas_id": 1,
     "mata_pelajaran_id": 3,
-    "jadwal_pelajaran_id": 5,
     "mata_pelajaran": "Pemrograman Web",
     "bab_materi": "Bab 2 - JavaScript DOM",
     "judul_tugas": "Tugas 2 - Event Listener",
     "jenis": "tugas",
     "tanggal": "2026-08-03",
     "keterangan": "Buat fungsi button click event"
+  }
+  ```
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Tugas/Penilaian berhasil dibuat.",
+    "data": {
+      "id": 15,
+      "guru_id": 2,
+      "kelas_id": 1,
+      "mata_pelajaran_id": 3,
+      "mata_pelajaran": "Pemrograman Web",
+      "bab_materi": "Bab 2 - JavaScript DOM",
+      "judul_tugas": "Tugas 2 - Event Listener",
+      "jenis": "tugas",
+      "tanggal": "2026-08-03",
+      "keterangan": "Buat fungsi button click event"
+    }
   }
   ```
 
@@ -607,31 +625,141 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
 
 ---
 
-## 5. 🛠️ MODUL ADMIN (`/api/admin`)
+## 5. 🛠️ MODUL ADMIN / SUPER ADMIN (`/api/admin`)
 
-### 1. Dashboard Admin (GET `/api/admin/dashboard`)
+### 1. Executive Dashboard Admin (GET `/api/admin/dashboard`)
+* **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
   {
     "success": true,
-    "tanggal": "Minggu, 02 Agustus 2026",
+    "tanggal": "Selasa, 04 Agustus 2026",
     "ringkasan": {
       "total_siswa": 720,
+      "total_guru": 35,
       "total_kelas": 24,
+      "total_mapel": 18,
       "hadir": 680,
       "terlambat": 25,
       "izin": 5,
       "sakit": 3,
       "alpha": 7,
-      "belum_absen": 0
-    }
+      "belum_absen": 0,
+      "wa_active": 1,
+      "wa_total": 1
+    },
+    "per_kelas": [
+      {
+        "id": 1,
+        "nama": "XII RPL 1",
+        "jurusan": "Rekayasa Perangkat Lunak",
+        "total": 36,
+        "hadir": 34,
+        "terlambat": 2,
+        "alpha": 0,
+        "izin": 0,
+        "sakit": 0,
+        "belum": 0
+      }
+    ],
+    "chart_7_hari": [
+      {
+        "tanggal": "2026-08-04",
+        "label": "Sel",
+        "hadir": 705,
+        "alpha": 7,
+        "izin_sakit": 8
+      }
+    ]
   }
   ```
 
 ---
 
-### 2. Status Device WA Sender (GET `/api/admin/wa-sender`)
-* **Response 200 OK**:
+### 2. Kelola Data Siswa (`/api/admin/siswa`)
+* **Daftar Siswa (GET `/api/admin/siswa?search=budi&kelas_id=1`)**:
+  ```json
+  {
+    "success": true,
+    "total": 720,
+    "data": [
+      {
+        "id": 12,
+        "nis": "20241001",
+        "nisn": "0051234567",
+        "nama": "Ahmad Rizky",
+        "foto_url": "https://.../photo.jpg",
+        "kelas_id": 1,
+        "kelas": "XII RPL 1",
+        "jurusan": "Rekayasa Perangkat Lunak",
+        "nama_ortu": "Bambang Rizky",
+        "no_wa_ortu": "081987654321",
+        "qr_token": "8f7a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
+        "qr_is_active": true
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "last_page": 36,
+      "per_page": 20,
+      "total": 720
+    }
+  }
+  ```
+* **Tambah Siswa Baru (POST `/api/admin/siswa`)**:
+  * Request Body: `{"kelas_id": 1, "nis": "20241005", "nama": "Dewi Sartika", "nama_ortu": "Suharto", "no_wa_ortu": "081234567890"}`
+* **Update Siswa (PUT `/api/admin/siswa/{id}`)**:
+  * Request Body: `{"kelas_id": 1, "nis": "20241005", "nama": "Dewi Sartika, S.T.", "no_wa_ortu": "081234567890"}`
+* **Hapus Siswa (DELETE `/api/admin/siswa/{id}`)**
+
+---
+
+### 3. Kelola Data Guru (`/api/admin/guru`)
+* **Daftar Guru (GET `/api/admin/guru?search=budi`)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 2,
+        "nip": "198501012010011001",
+        "nama": "Budi Santoso, S.Pd.",
+        "no_hp": "081234567890",
+        "foto_url": "https://.../budi.jpg",
+        "wali_kelas": "XII RPL 1"
+      }
+    ]
+  }
+  ```
+* **Tambah Guru Baru (POST `/api/admin/guru`)**:
+  * Request Body: `{"nama": "Budi Santoso", "nip": "19850101...", "no_hp": "0812...", "email": "guru2@sekolah.com", "password": "password123"}`
+* **Update Guru (PUT `/api/admin/guru/{id}`)**
+* **Hapus Guru (DELETE `/api/admin/guru/{id}`)**
+
+---
+
+### 4. Kelola Data Kelas (`/api/admin/kelas`)
+* **Daftar Kelas (GET `/api/admin/kelas`)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 1,
+        "nama": "XII RPL 1",
+        "jurusan": "Rekayasa Perangkat Lunak",
+        "wali_kelas": "Budi Santoso, S.Pd.",
+        "total_siswa": 36
+      }
+    ]
+  }
+  ```
+* **Tambah Kelas (POST `/api/admin/kelas`)**: `{"nama": "XII RPL 2", "jurusan_id": 1, "wali_kelas_id": 2}`
+
+---
+
+### 5. WA Sender & WA Logs (`/api/admin/wa-sender` & `/api/admin/wa-logs`)
+* **Status Device WA Sender (GET `/api/admin/wa-sender`)**:
   ```json
   {
     "success": true,
@@ -647,6 +775,48 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
     ]
   }
   ```
+* **Log Pengiriman WA (GET `/api/admin/wa-logs?search=...`)**:
+  ```json
+  {
+    "success": true,
+    "total": 150,
+    "data": [
+      {
+        "id": 1,
+        "recipient": "081987654321",
+        "siswa_nama": "Ahmad Rizky",
+        "pesan": "Absensi BERHASIL! Ahmad Rizky tercatat HADIR (Jam 06:55:10)",
+        "status": "terkirim",
+        "created_at": "2026-08-04 06:55:10",
+        "created_at_label": "10 menit yang lalu"
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "last_page": 8,
+      "per_page": 20,
+      "total": 150
+    }
+  }
+  ```
+
+---
+
+### 6. Pengaturan Jam Absensi Sekolah (`/api/admin/pengaturan-absensi`)
+* **Get Pengaturan (GET `/api/admin/pengaturan-absensi`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": 1,
+      "jam_masuk_batas": "07:00:00",
+      "jam_absensi_tutup": "12:00:00",
+      "aktif_sabtu": false
+    }
+  }
+  ```
+* **Update Pengaturan Jam (POST `/api/admin/pengaturan-absensi`)**:
+  * Request Body: `{"jam_masuk_batas": "07:15:00", "jam_absensi_tutup": "12:00:00", "aktif_sabtu": false}`
 
 ---
 

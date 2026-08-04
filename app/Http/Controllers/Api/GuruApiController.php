@@ -485,7 +485,7 @@ class GuruApiController extends Controller
             'kelas_id'            => 'required|exists:kelas,id',
             'mata_pelajaran_id'   => 'nullable|exists:mata_pelajaran,id',
             'jadwal_pelajaran_id' => 'nullable|exists:jadwal_pelajaran,id',
-            'mata_pelajaran'      => 'required|string|max:255',
+            'mata_pelajaran'      => 'nullable|string|max:255',
             'bab_materi'          => 'required|string|max:255',
             'judul_tugas'         => 'required|string|max:255',
             'jenis'               => 'required|in:tugas,uh,uts,uas,praktikum',
@@ -501,6 +501,10 @@ class GuruApiController extends Controller
             if ($mapel) {
                 $validated['mata_pelajaran'] = $mapel->nama;
             }
+        }
+
+        if (empty($validated['mata_pelajaran'])) {
+            $validated['mata_pelajaran'] = 'Mata Pelajaran Umum';
         }
 
         $tugas = \App\Models\TugasMateri::create($validated);
