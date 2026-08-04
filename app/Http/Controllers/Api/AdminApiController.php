@@ -435,6 +435,45 @@ class AdminApiController extends Controller
         ], 201);
     }
 
+    /**
+     * Update Data Kelas.
+     * PUT /api/admin/kelas/{id}
+     */
+    public function kelasUpdate(Request $request, int $id): JsonResponse
+    {
+        $kelas = Kelas::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama'          => "required|string|max:100|unique:kelas,nama,{$id}",
+            'jurusan_id'    => 'required|exists:jurusan,id',
+            'wali_kelas_id' => 'nullable|exists:guru,id',
+        ]);
+
+        $kelas->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Kelas '{$kelas->nama}' berhasil diperbarui.",
+            'data'    => $kelas,
+        ]);
+    }
+
+    /**
+     * Hapus Data Kelas.
+     * DELETE /api/admin/kelas/{id}
+     */
+    public function kelasDestroy(int $id): JsonResponse
+    {
+        $kelas = Kelas::findOrFail($id);
+        $nama  = $kelas->nama;
+        $kelas->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Kelas '{$nama}' berhasil dihapus.",
+        ]);
+    }
+
     // ─── WA SENDER & LOGS ──────────────────────────────────────────────────
 
     /**
@@ -455,6 +494,70 @@ class AdminApiController extends Controller
                 'status_color'=> $w->status === 'aktif' ? '#22c55e' : '#ef4444',
                 'kelas_count' => $w->kelas->count(),
             ]),
+        ]);
+    }
+
+    /**
+     * Tambah WA Sender Device Baru.
+     * POST /api/admin/wa-sender
+     */
+    public function waSenderStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'       => 'required|string|max:255',
+            'phone'      => 'required|string|max:30|unique:wa_senders,phone',
+            'session_id' => 'nullable|string|max:255',
+            'api_key'    => 'nullable|string|max:255',
+            'status'     => 'required|in:aktif,nonaktif',
+        ]);
+
+        $sender = WaSender::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Device WA '{$sender->name}' berhasil ditambahkan.",
+            'data'    => $sender,
+        ], 201);
+    }
+
+    /**
+     * Update WA Sender Device.
+     * PUT /api/admin/wa-sender/{id}
+     */
+    public function waSenderUpdate(Request $request, int $id): JsonResponse
+    {
+        $sender = WaSender::findOrFail($id);
+
+        $validated = $request->validate([
+            'name'       => 'required|string|max:255',
+            'phone'      => "required|string|max:30|unique:wa_senders,phone,{$id}",
+            'session_id' => 'nullable|string|max:255',
+            'api_key'    => 'nullable|string|max:255',
+            'status'     => 'required|in:aktif,nonaktif',
+        ]);
+
+        $sender->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Device WA '{$sender->name}' berhasil diperbarui.",
+            'data'    => $sender,
+        ]);
+    }
+
+    /**
+     * Hapus WA Sender Device.
+     * DELETE /api/admin/wa-sender/{id}
+     */
+    public function waSenderDestroy(int $id): JsonResponse
+    {
+        $sender = WaSender::findOrFail($id);
+        $name   = $sender->name;
+        $sender->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Device WA '{$name}' berhasil dihapus.",
         ]);
     }
 
@@ -499,7 +602,41 @@ class AdminApiController extends Controller
         ]);
     }
 
-    // ─── MASTER MAPEL & JADWAL & USERS ─────────────────────────────────────
+    // ─── MASTER MAPEL & JADWAL & USERS & JURUSAN ─────────────────────────────
+
+    /**
+     * Master Data Jurusan API.
+     * GET /api/admin/jurusan
+     */
+    public function jurusanList(Request $request): JsonResponse
+    {
+        $jurusan = \App\Models\Jurusan::orderBy('nama')->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $jurusan,
+        ]);
+    }
+
+    /**
+     * Tambah Jurusan Baru.
+     * POST /api/admin/jurusan
+     */
+    public function jurusanStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'kode' => 'required|string|max:20|unique:jurusan,kode',
+            'nama' => 'required|string|max:255',
+        ]);
+
+        $jurusan = \App\Models\Jurusan::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Jurusan '{$jurusan->nama}' berhasil dibuat.",
+            'data'    => $jurusan,
+        ], 201);
+    }
 
     /**
      * User Management API.
@@ -546,6 +683,86 @@ class AdminApiController extends Controller
     }
 
     /**
+     * Tambah User Baru.
+     * POST /api/admin/users
+     */
+    public function userStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role'     => 'required|in:admin,guru,siswa,super_admin',
+        ]);
+
+        $user = User::create([
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
+        $user->assignRole($validated['role']);
+
+        return response()->json([
+            'success' => true,
+            'message' => "User '{$user->name}' berhasil dibuat.",
+            'data'    => $user,
+        ], 201);
+    }
+
+    /**
+     * Update User Account.
+     * PUT /api/admin/users/{id}
+     */
+    public function userUpdate(Request $request, int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => "required|email|unique:users,email,{$id}",
+            'password' => 'nullable|string|min:6',
+            'role'     => 'nullable|in:admin,guru,siswa,super_admin',
+        ]);
+
+        $updateData = [
+            'name'  => $validated['name'],
+            'email' => $validated['email'],
+        ];
+
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($updateData);
+
+        if (!empty($validated['role'])) {
+            $user->syncRoles([$validated['role']]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "User '{$user->name}' berhasil diperbarui.",
+            'data'    => $user,
+        ]);
+    }
+
+    /**
+     * Hapus User Account.
+     * DELETE /api/admin/users/{id}
+     */
+    public function userDestroy(int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+        $name = $user->name;
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "User '{$name}' berhasil dihapus.",
+        ]);
+    }
+
+    /**
      * Data Master Mapel API.
      * GET /api/admin/mapel
      */
@@ -586,6 +803,45 @@ class AdminApiController extends Controller
     }
 
     /**
+     * Update Data Mapel.
+     * PUT /api/admin/mapel/{id}
+     */
+    public function mapelUpdate(Request $request, int $id): JsonResponse
+    {
+        $mapel = MataPelajaran::findOrFail($id);
+
+        $validated = $request->validate([
+            'kode'     => "required|string|max:50|unique:mata_pelajaran,kode,{$id}",
+            'nama'     => 'required|string|max:255',
+            'kelompok' => 'required|in:normatif,adaptif,produktif,muatan_lokal',
+        ]);
+
+        $mapel->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Mata pelajaran '{$mapel->nama}' berhasil diperbarui.",
+            'data'    => $mapel,
+        ]);
+    }
+
+    /**
+     * Hapus Data Mapel.
+     * DELETE /api/admin/mapel/{id}
+     */
+    public function mapelDestroy(int $id): JsonResponse
+    {
+        $mapel = MataPelajaran::findOrFail($id);
+        $nama  = $mapel->nama;
+        $mapel->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Mata pelajaran '{$nama}' berhasil dihapus.",
+        ]);
+    }
+
+    /**
      * Jadwal Pelajaran API.
      * GET /api/admin/jadwal
      */
@@ -607,13 +863,133 @@ class AdminApiController extends Controller
             'success' => true,
             'data'    => $jadwal->map(fn($j) => [
                 'id'            => $j->id,
+                'kelas_id'      => $j->kelas_id,
                 'kelas'         => $j->kelas->nama ?? '-',
+                'mata_pelajaran_id' => $j->mata_pelajaran_id,
                 'mata_pelajaran'=> $j->mataPelajaran->nama ?? '-',
+                'guru_id'       => $j->guru_id,
                 'guru'          => $j->guru->nama ?? '-',
                 'hari'          => $j->hari_label,
                 'jam'           => $j->jam_format,
+                'jam_mulai'     => $j->jam_mulai,
+                'jam_selesai'   => $j->jam_selesai,
                 'ruangan'       => $j->ruangan ?? 'Kelas Reguler',
             ]),
+        ]);
+    }
+
+    /**
+     * Tambah Jadwal Pelajaran Baru.
+     * POST /api/admin/jadwal
+     */
+    public function jadwalStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'kelas_id'          => 'required|exists:kelas,id',
+            'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
+            'guru_id'           => 'required|exists:guru,id',
+            'hari'              => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu',
+            'jam_mulai'         => 'required|string',
+            'jam_selesai'       => 'required|string',
+            'ruangan'           => 'nullable|string|max:100',
+        ]);
+
+        $jadwal = JadwalPelajaran::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal pelajaran berhasil ditambahkan.',
+            'data'    => $jadwal,
+        ], 201);
+    }
+
+    /**
+     * Update Jadwal Pelajaran.
+     * PUT /api/admin/jadwal/{id}
+     */
+    public function jadwalUpdate(Request $request, int $id): JsonResponse
+    {
+        $jadwal = JadwalPelajaran::findOrFail($id);
+
+        $validated = $request->validate([
+            'kelas_id'          => 'required|exists:kelas,id',
+            'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
+            'guru_id'           => 'required|exists:guru,id',
+            'hari'              => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu',
+            'jam_mulai'         => 'required|string',
+            'jam_selesai'       => 'required|string',
+            'ruangan'           => 'nullable|string|max:100',
+        ]);
+
+        $jadwal->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal pelajaran berhasil diperbarui.',
+            'data'    => $jadwal,
+        ]);
+    }
+
+    /**
+     * Hapus Jadwal Pelajaran.
+     * DELETE /api/admin/jadwal/{id}
+     */
+    public function jadwalDestroy(int $id): JsonResponse
+    {
+        $jadwal = JadwalPelajaran::findOrFail($id);
+        $jadwal->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal pelajaran berhasil dihapus.',
+        ]);
+    }
+
+    /**
+     * Rekap Absensi Global Seluruh Sekolah untuk Admin.
+     * GET /api/admin/absensi/rekap?tanggal=YYYY-MM-DD&kelas_id=...&status=...
+     */
+    public function absensiRekap(Request $request): JsonResponse
+    {
+        $tanggal = $request->filled('tanggal') ? Carbon::parse($request->tanggal) : today();
+
+        $query = Absensi::with(['siswa.kelas', 'dicatatOleh']);
+
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $absensiPaginator = $query->whereDate('tanggal', $tanggal)
+            ->orderBy('jam_scan')
+            ->paginate(30);
+
+        return response()->json([
+            'success'       => true,
+            'tanggal'       => $tanggal->format('Y-m-d'),
+            'tanggal_label' => $tanggal->translatedFormat('l, d F Y'),
+            'total'         => $absensiPaginator->total(),
+            'data'          => collect($absensiPaginator->items())->map(fn($a) => [
+                'id'           => $a->id,
+                'siswa_id'     => $a->siswa_id,
+                'nama'         => $a->siswa->nama ?? '-',
+                'nis'          => $a->siswa->nis ?? '-',
+                'kelas'        => $a->siswa->kelas->nama ?? '-',
+                'status'       => $a->status,
+                'status_label' => $a->status_label,
+                'status_color' => $a->status_color,
+                'jam_scan'     => $a->jam_scan ?? '-',
+                'keterangan'   => $a->keterangan ?? '-',
+            ])->values(),
+            'pagination'    => [
+                'current_page' => $absensiPaginator->currentPage(),
+                'last_page'    => $absensiPaginator->lastPage(),
+                'per_page'     => $absensiPaginator->perPage(),
+                'total'        => $absensiPaginator->total(),
+            ],
         ]);
     }
 
@@ -662,3 +1038,4 @@ class AdminApiController extends Controller
         ]);
     }
 }
+

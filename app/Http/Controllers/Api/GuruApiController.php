@@ -309,10 +309,84 @@ class GuruApiController extends Controller
     }
 
     /**
+     * Master Data Mata Pelajaran untuk Guru.
+     * GET /api/guru/mapel
+     */
+    public function mapelList(Request $request): JsonResponse
+    {
+        $mapelList = \App\Models\MataPelajaran::orderBy('nama')->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $mapelList->map(fn($m) => [
+                'id'       => $m->id,
+                'kode'     => $m->kode,
+                'nama'     => $m->nama,
+                'kelompok' => $m->kelompok_label,
+            ]),
+        ]);
+    }
+
+    /**
+     * Opsi Dropdown Form Penilaian Baru (Kelas, Mapel, Jadwal, Jenis).
+     * GET /api/guru/penilaian/options
+     */
+    public function penilaianOptions(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $guru = $user->guru;
+
+        if ($user->hasRole('guru') && $guru) {
+            $kelasList  = $guru->getKelasAkses();
+            $jadwalList = \App\Models\JadwalPelajaran::with(['kelas', 'mataPelajaran'])->where('guru_id', $guru->id)->get();
+        } else {
+            $kelasList  = Kelas::with('jurusan')->orderBy('nama')->get();
+            $jadwalList = \App\Models\JadwalPelajaran::with(['kelas', 'mataPelajaran', 'guru'])->get();
+        }
+
+        $mapelList = \App\Models\MataPelajaran::orderBy('nama')->get();
+
+        $jenisOptions = [
+            ['key' => 'tugas',     'label' => 'Tugas Harian'],
+            ['key' => 'uh',        'label' => 'Ulangan Harian (UH)'],
+            ['key' => 'uts',       'label' => 'Ujian Tengah Semester (UTS)'],
+            ['key' => 'uas',       'label' => 'Ujian Akhir Semester (UAS)'],
+            ['key' => 'praktikum', 'label' => 'Praktikum / Unjuk Kerja'],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'kelas' => $kelasList->map(fn($k) => [
+                    'id'      => $k->id,
+                    'nama'    => $k->nama,
+                    'jurusan' => $k->jurusan->nama ?? '-',
+                ]),
+                'mapel' => $mapelList->map(fn($m) => [
+                    'id'   => $m->id,
+                    'kode' => $m->kode,
+                    'nama' => $m->nama,
+                ]),
+                'jadwal' => $jadwalList->map(fn($j) => [
+                    'id'                => $j->id,
+                    'hari'              => $j->hari_label,
+                    'jam'               => $j->jam_format,
+                    'kelas_id'          => $j->kelas_id,
+                    'kelas_nama'        => $j->kelas->nama ?? '-',
+                    'mata_pelajaran_id' => $j->mata_pelajaran_id,
+                    'mata_pelajaran'    => $j->mataPelajaran->nama ?? '-',
+                ]),
+                'jenis' => $jenisOptions,
+            ],
+        ]);
+    }
+
+    /**
      * Daftar Penilaian & Tugas Harian oleh Guru.
      * GET /api/guru/penilaian
      */
     public function penilaianList(Request $request): JsonResponse
+
     {
         $user = $request->user();
         $guru = $user->guru;
@@ -481,6 +555,19 @@ class GuruApiController extends Controller
      */
     public function penilaianStore(Request $request): JsonResponse
     {
+        // Jika jadwal_pelajaran_id diisi, otomatis isi kelas_id dan mata_pelajaran_id jika belum diisi
+        if ($request->filled('jadwal_pelajaran_id')) {
+            $jadwal = \App\Models\JadwalPelajaran::find($request->input('jadwal_pelajaran_id'));
+            if ($jadwal) {
+                if (!$request->filled('kelas_id')) {
+                    $request->merge(['kelas_id' => $jadwal->kelas_id]);
+                }
+                if (!$request->filled('mata_pelajaran_id')) {
+                    $request->merge(['mata_pelajaran_id' => $jadwal->mata_pelajaran_id]);
+                }
+            }
+        }
+
         $validated = $request->validate([
             'kelas_id'            => 'required|exists:kelas,id',
             'mata_pelajaran_id'   => 'nullable|exists:mata_pelajaran,id',
@@ -524,6 +611,58 @@ class GuruApiController extends Controller
             'data'    => $tugas,
         ]);
     }
+
+    /**
+     * Update Data Tugas / Penilaian.
+     * PUT /api/guru/penilaian/{id}
+     */
+    public function penilaianUpdate(Request $request, int $id): JsonResponse
+    {
+        $tugas = \App\Models\TugasMateri::findOrFail($id);
+
+        $validated = $request->validate([
+            'kelas_id'            => 'sometimes|required|exists:kelas,id',
+            'mata_pelajaran_id'   => 'nullable|exists:mata_pelajaran,id',
+            'jadwal_pelajaran_id' => 'nullable|exists:jadwal_pelajaran,id',
+            'mata_pelajaran'      => 'nullable|string|max:255',
+            'bab_materi'          => 'sometimes|required|string|max:255',
+            'judul_tugas'         => 'sometimes|required|string|max:255',
+            'jenis'               => 'sometimes|required|in:tugas,uh,uts,uas,praktikum',
+            'tanggal'             => 'sometimes|required|date',
+            'keterangan'          => 'nullable|string',
+        ]);
+
+        if (!empty($validated['mata_pelajaran_id'])) {
+            $mapel = \App\Models\MataPelajaran::find($validated['mata_pelajaran_id']);
+            if ($mapel) {
+                $validated['mata_pelajaran'] = $mapel->nama;
+            }
+        }
+
+        $tugas->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tugas/Penilaian berhasil diperbarui.',
+            'data'    => $tugas,
+        ]);
+    }
+
+    /**
+     * Hapus Data Tugas / Penilaian & Seluruh Nilai Siswa Terkait.
+     * DELETE /api/guru/penilaian/{id}
+     */
+    public function penilaianDestroy(int $id): JsonResponse
+    {
+        $tugas = \App\Models\TugasMateri::findOrFail($id);
+        $tugas->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tugas/Penilaian dan seluruh nilai siswa terkait berhasil dihapus.',
+        ]);
+    }
+
 
     /**
      * Simpan Nilai Batch Siswa via Mobile App.

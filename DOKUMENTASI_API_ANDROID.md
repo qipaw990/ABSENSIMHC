@@ -1,32 +1,35 @@
-# 📱 DOKUMENTASI RESTFUL API APLIKASI MOBILE ANDROID
+# 📱 DOKUMENTASI LENGKAP RESTFUL API APLIKASI MOBILE ANDROID
+> **Aplikasi:** Sistem Absensi QR Code & WA (MHC)  
 > **Developer:** qpawdeveloper  
-> **Auth Method:** Laravel Sanctum (Bearer Token)  
-> **Format Data:** JSON (`Content-Type: application/json` & `Accept: application/json`)
+> **Auth Method:** Laravel Sanctum (`Bearer Token`)  
+> **Format Request & Response:** JSON (`Content-Type: application/json` & `Accept: application/json`)  
+> **Terakhir Diperbarui:** Agustus 2026
 
-Dokumen ini berisi spesifikasi lengkap **RESTful API** untuk pengembangan aplikasi Android (Native Kotlin/Java, Flutter, maupun React Native) pada **Sistem Absensi QR Code & WA**.
+Dokumen ini berisi spesifikasi teknis lengkap untuk seluruh endpoint **RESTful API** yang tersedia pada backend sistem absensi, dirancang untuk diintegrasikan dengan aplikasi Android (Native Kotlin/Java, Flutter, React Native).
 
 ---
 
 ## 📑 DAFTAR ISI
 1. [Standar Request & Headers](#1-standar-request--headers)
-2. [Modul Autentikasi (`/api/auth`)](#2-modul-autentikasi-apiauth)
-3. [Modul Guru / Wali Kelas (`/api/guru`)](#3-modul-guru--wali-kelas-apiguru)
-4. [Modul Siswa (`/api/siswa`)](#4-modul-siswa-apisiswa)
-5. [Modul Admin (`/api/admin`)](#5-modul-admin-apiadmin)
-6. [Format Response & Penanganan Error](#6-format-response--penanganan-error)
-7. [Contoh Implementasi Client Android (Kotlin + Retrofit)](#7-contoh-implementasi-client-android-kotlin--retrofit)
+2. [Check Server & Health (`/api`)](#2-check-server--health-api)
+3. [Modul Autentikasi (`/api/auth`)](#3-modul-autentikasi-apiauth)
+4. [Modul Guru / Wali Kelas (`/api/guru`)](#4-modul-guru--wali-kelas-apiguru)
+5. [Modul Siswa (`/api/siswa`)](#5-modul-siswa-apisiswa)
+6. [Modul Admin (`/api/admin`)](#6-modul-admin-apiadmin)
+7. [Format Error & Status Code](#7-format-error--status-code)
+8. [Contoh Code Client Android (Kotlin + Retrofit)](#8-contoh-code-client-android-kotlin--retrofit)
 
 ---
 
 ## 1. 🌐 STANDAR REQUEST & HEADERS
 
-* **Base URL**: `https://absensi.sekolah.sch.id` (atau `http://IP_SERVER:8585`)
-* **Headers Publik (Login)**:
+* **Base URL**: `http://IP_SERVER:8585` atau `https://absensi.sekolah.sch.id`
+* **Headers Publik (Tanpa Token)**:
   ```http
   Content-Type: application/json
   Accept: application/json
   ```
-* **Headers Protected (Butuh Autentikasi Token)**:
+* **Headers Terproteksi (Dengan Bearer Token)**:
   ```http
   Authorization: Bearer <TOKEN_SANCTUM>
   Content-Type: application/json
@@ -35,16 +38,40 @@ Dokumen ini berisi spesifikasi lengkap **RESTful API** untuk pengembangan aplika
 
 ---
 
-## 2. 🔑 MODUL AUTENTIKASI (`/api/auth`)
+## 2. 🟢 CHECK SERVER & HEALTH (`/api`)
+
+### 1. Root API Check (GET `/api`)
+Mengecek status ketersediaan service API backend.
+
+* **Headers**: Tidak memerlukan autentikasi token.
+* **Response 200 OK**:
+  ```json
+  {
+    "status": "online",
+    "service": "RESTful API Sistem Absensi MHC",
+    "developer": "qpawdeveloper",
+    "version": "1.0.0",
+    "endpoints": {
+      "login": "POST /api/auth/login",
+      "health": "GET /up"
+    },
+    "timestamp": "2026-08-04T16:00:00+07:00"
+  }
+  ```
+
+---
+
+## 3. 🔑 MODUL AUTENTIKASI (`/api/auth`)
 
 ### 1. Login User (POST `/api/auth/login`)
-Digunakan oleh aplikasi Android untuk melakukan autentikasi login (Guru, Siswa, Admin).
+Melakukan autentikasi akun user (Guru, Siswa, Admin/Super Admin) untuk mendapatkan Sanctum Bearer Token.
 
+* **Headers**: `Content-Type: application/json`
 * **Request Body**:
   ```json
   {
-    "email": "guru@sekolah.com",
-    "password": "Password123!",
+    "email": "guru@sekolah.sch.id",
+    "password": "password123",
     "device_name": "Samsung Galaxy A54"
   }
   ```
@@ -56,22 +83,25 @@ Digunakan oleh aplikasi Android untuk melakukan autentikasi login (Guru, Siswa, 
     "user": {
       "id": 5,
       "name": "Budi Santoso, S.Pd.",
-      "email": "guru@sekolah.com",
+      "email": "guru@sekolah.sch.id",
       "role": "guru",
       "roles": ["guru"],
       "guru": {
         "id": 2,
         "nip": "198501012010011001",
         "nama": "Budi Santoso, S.Pd.",
-        "foto": "https://domain.com/storage/guru/budi.jpg"
+        "foto": "http://IP_SERVER:8585/storage/guru/budi.jpg"
       }
     }
   }
   ```
+  *(Catatan: Jika user ber-role `siswa`, properti `siswa` akan terisi otomatis beserta detail kelas dan `qr_token`)*.
 
 ---
 
-### 2. Profile User saat ini (GET `/api/auth/me`)
+### 2. Check Profile Login (GET `/api/auth/me`)
+Mendapatkan informasi profil lengkap user yang sedang aktif berdasarkan Bearer Token.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
@@ -79,9 +109,16 @@ Digunakan oleh aplikasi Android untuk melakukan autentikasi login (Guru, Siswa, 
     "success": true,
     "user": {
       "id": 5,
-      "name": "Budi Santoso",
-      "email": "guru@sekolah.com",
-      "role": "guru"
+      "name": "Budi Santoso, S.Pd.",
+      "email": "guru@sekolah.sch.id",
+      "role": "guru",
+      "roles": ["guru"],
+      "guru": {
+        "id": 2,
+        "nip": "198501012010011001",
+        "nama": "Budi Santoso, S.Pd.",
+        "foto": "http://IP_SERVER:8585/storage/guru/budi.jpg"
+      }
     }
   }
   ```
@@ -89,13 +126,15 @@ Digunakan oleh aplikasi Android untuk melakukan autentikasi login (Guru, Siswa, 
 ---
 
 ### 3. Ubah Password (POST `/api/auth/change-password`)
+Mengubah password user dari aplikasi Android.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Request Body**:
   ```json
   {
-    "current_password": "PasswordLama123",
-    "new_password": "PasswordBaru456",
-    "new_password_confirmation": "PasswordBaru456"
+    "current_password": "passwordLama123",
+    "new_password": "passwordBaru456",
+    "new_password_confirmation": "passwordBaru456"
   }
   ```
 * **Response 200 OK**:
@@ -105,10 +144,39 @@ Digunakan oleh aplikasi Android untuk melakukan autentikasi login (Guru, Siswa, 
     "message": "Password berhasil diperbarui."
   }
   ```
+* **Response 422 Unprocessable Entity (Password lama tidak cocok)**:
+  ```json
+  {
+    "success": false,
+    "message": "Password saat ini tidak cocok."
+  }
+  ```
 
 ---
 
-### 4. Logout User (POST `/api/auth/logout`)
+### 4. Update FCM Device Token (POST `/api/auth/fcm-token`)
+Mendaftarkan atau memperbarui Firebase Cloud Messaging (FCM) token HP Android untuk menerima Notifikasi Push.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Request Body**:
+  ```json
+  {
+    "fcm_token": "eXamPleFcmToken1234567890abcdef..."
+  }
+  ```
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Device token FCM berhasil diperbarui."
+  }
+  ```
+
+---
+
+### 5. Logout User (POST `/api/auth/logout`)
+Mencabut (`revoke`) Bearer Token saat ini dan mengakhiri sesi login.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
@@ -120,9 +188,12 @@ Digunakan oleh aplikasi Android untuk melakukan autentikasi login (Guru, Siswa, 
 
 ---
 
-## 3. 👨‍🏫 MODUL GURU / WALI KELAS (`/api/guru`)
+## 4. 👨‍🏫 MODUL GURU / WALI KELAS (`/api/guru`)
+> **Akses Role**: `guru`, `admin`, `super_admin`
 
 ### 1. Daftar Kelas yang Diampu (GET `/api/guru/kelas`)
+Menampilkan daftar kelas yang diampu / wali kelas guru yang login. (Jika admin/super_admin, menampilkan seluruh kelas).
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
@@ -141,18 +212,66 @@ Digunakan oleh aplikasi Android untuk melakukan autentikasi login (Guru, Siswa, 
 
 ---
 
-### 2. Scan QR Code Absensi Siswa (POST `/api/guru/absensi/scan`)
-Fungsi utama kamera scanner Android milik Guru untuk memproses QR Code Siswa.
+### 2. Statistik Kelas Hari Ini (GET `/api/guru/kelas/{id}/stats`)
+Mendapatkan statistik absensi kelas secara real-time pada hari ini.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "kelas": {
+      "id": 1,
+      "nama": "X RPL 1",
+      "jurusan": "Rekayasa Perangkat Lunak"
+    },
+    "stats": {
+      "hadir": 30,
+      "terlambat": 3,
+      "izin": 1,
+      "sakit": 1,
+      "alpha": 0
+    },
+    "tanggal": "Selasa, 04 Agustus 2026"
+  }
+  ```
+
+---
+
+### 3. Daftar Siswa Belum Scan Hari Ini (GET `/api/guru/kelas/{id}/belum-scan`)
+Mendapatkan daftar siswa yang belum melakukan scan presensi hari ini pada kelas tertentu.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "count": 2,
+    "siswa": [
+      {
+        "id": 15,
+        "nama": "Doni Setiawan",
+        "nis": "20241015",
+        "foto_url": "http://IP_SERVER:8585/storage/siswa/doni.jpg"
+      }
+    ]
+  }
+  ```
+
+---
+
+### 4. Scan QR Code Absensi Siswa (POST `/api/guru/absensi/scan`)
+Memproses token QR code hasil scan kamera Android milik Guru/Wali Kelas.
 
 * **Headers**: `Authorization: Bearer <token>`
 * **Request Body**:
   ```json
   {
-    "qr_token": "token_qr_32_karakter_siswa",
+    "qr_token": "8f7a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
     "kelas_id": 1
   }
   ```
-* **Response 200 OK (Berhasil Scan)**:
+* **Response 200 OK (Presensi Berhasil)**:
   ```json
   {
     "success": true,
@@ -161,7 +280,7 @@ Fungsi utama kamera scanner Android milik Guru untuk memproses QR Code Siswa.
       "nama": "Ahmad Rizky",
       "nis": "20241001",
       "kelas": "X RPL 1",
-      "foto_url": "https://.../siswa.jpg"
+      "foto_url": "http://IP_SERVER:8585/storage/siswa/ahmad.jpg"
     },
     "absensi": {
       "status": "hadir",
@@ -174,8 +293,8 @@ Fungsi utama kamera scanner Android milik Guru untuk memproses QR Code Siswa.
 
 ---
 
-### 3. Presensi Manual Siswa (POST `/api/guru/absensi/manual`)
-Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
+### 5. Input Presensi Manual Siswa (POST `/api/guru/absensi/manual`)
+Digunakan oleh guru jika siswa tidak membawa HP / kartu QR Code. Otomatis mengirimkan notifikasi WA ke orang tua siswa.
 
 * **Headers**: `Authorization: Bearer <token>`
 * **Request Body**:
@@ -185,9 +304,10 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
     "kelas_id": 1,
     "status": "hadir",
     "keterangan": "Kartu QR tertinggal",
-    "tanggal": "2026-08-02"
+    "tanggal": "2026-08-04"
   }
   ```
+  *(Status pilihan: `hadir`, `terlambat`, `izin`, `sakit`, `alpha`)*
 * **Response 200 OK**:
   ```json
   {
@@ -198,35 +318,50 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
       "siswa_nama": "Ahmad Rizky",
       "status": "hadir",
       "status_label": "Hadir",
-      "jam_scan": "07:10:00",
-      "tanggal": "2026-08-02"
+      "jam_scan": "07:05:00",
+      "tanggal": "2026-08-04"
     }
   }
   ```
 
 ---
 
-### 4. Rekap Absensi Kelas per Tanggal (GET `/api/guru/absensi/rekap/{kelas_id}?tanggal=YYYY-MM-DD`)
+### 6. Rekap Absensi Kelas per Tanggal (GET `/api/guru/absensi/rekap/{kelas_id}?tanggal=YYYY-MM-DD`)
+Mendapatkan rekapitulasi data absensi siswa di kelas tertentu berdasarkan tanggal.
+
 * **Headers**: `Authorization: Bearer <token>`
+* **Query Parameter**: `tanggal` (opsional, format `YYYY-MM-DD`, default: hari ini)
 * **Response 200 OK**:
   ```json
   {
     "success": true,
-    "kelas": {"id": 1, "nama": "X RPL 1"},
-    "tanggal": "2026-08-02",
+    "kelas": {
+      "id": 1,
+      "nama": "X RPL 1"
+    },
+    "tanggal": "2026-08-04",
     "absensi": [
       {
         "id": 101,
         "nama": "Ahmad Rizky",
         "nis": "20241001",
+        "foto_url": "http://IP_SERVER:8585/storage/siswa/ahmad.jpg",
         "status": "hadir",
+        "status_label": "Hadir",
+        "status_color": "green",
         "jam_scan": "06:55:10"
       }
     ],
-    "belum_absen": [],
+    "belum_absen": [
+      {
+        "id": 15,
+        "nama": "Doni Setiawan",
+        "nis": "20241015"
+      }
+    ],
     "stats": {
       "hadir": 30,
-      "terlambat": 4,
+      "terlambat": 3,
       "izin": 1,
       "sakit": 1,
       "alpha": 0
@@ -236,14 +371,16 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 
 ---
 
-### 5. Edit Data Absensi (PUT `/api/guru/absensi/{id}`)
+### 7. Edit Data Absensi (PUT `/api/guru/absensi/{id}`)
+Mengubah status atau rincian data absensi siswa.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Request Body**:
   ```json
   {
     "status": "terlambat",
     "jam_scan": "07:25:00",
-    "keterangan": "Terlambat 15 menit"
+    "keterangan": "Terlambat 25 menit (Ban meletus)"
   }
   ```
 * **Response 200 OK**:
@@ -255,14 +392,16 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
       "id": 101,
       "status": "terlambat",
       "jam_scan": "07:25:00",
-      "keterangan": "Terlambat 15 menit"
+      "keterangan": "Terlambat 25 menit (Ban meletus)"
     }
   }
   ```
 
 ---
 
-### 6. Hapus Data Absensi (DELETE `/api/guru/absensi/{id}`)
+### 8. Hapus Data Absensi (DELETE `/api/guru/absensi/{id}`)
+Menghapus record absensi siswa.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
@@ -274,7 +413,9 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 
 ---
 
-### 7. Jadwal Mengajar Guru (GET `/api/guru/jadwal`)
+### 9. Jadwal Mengajar Guru (GET `/api/guru/jadwal`)
+Mendapatkan jadwal jam mengajar guru yang sedang login.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
@@ -295,13 +436,79 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 
 ---
 
-### 8. Daftar Tugas & Penilaian Guru (GET `/api/guru/penilaian?kelas_id=1`)
+### 10. Master Data Mata Pelajaran untuk Guru (GET `/api/guru/mapel`)
+Mendapatkan daftar master mata pelajaran untuk pilihan dropdown pada form input tugas/penilaian.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
   {
     "success": true,
-    "total": 5,
+    "data": [
+      {
+        "id": 3,
+        "kode": "PPLG-WEB",
+        "nama": "Pemrograman Web",
+        "kelompok": "Produktif"
+      }
+    ]
+  }
+  ```
+
+---
+
+### 11. Opsi Form Tambah Tugas / Penilaian Baru (GET `/api/guru/penilaian/options`)
+Mendapatkan seluruh opsi data (Kelas, Mapel Master Data, Jadwal Pelajaran Guru, Jenis Penilaian) sekaligus dalam 1 request HTTP untuk mengisi dropdown form "Tambah Tugas & Bab Materi Baru" pada aplikasi Android.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "kelas": [
+        { "id": 1, "nama": "X RPL 1", "jurusan": "Rekayasa Perangkat Lunak" }
+      ],
+      "mapel": [
+        { "id": 3, "kode": "PPLG-WEB", "nama": "Pemrograman Web" }
+      ],
+      "jadwal": [
+        {
+          "id": 5,
+          "hari": "Senin",
+          "jam": "07:15 - 08:45",
+          "kelas_id": 1,
+          "kelas_nama": "X RPL 1",
+          "mata_pelajaran_id": 3,
+          "mata_pelajaran": "Pemrograman Web"
+        }
+      ],
+      "jenis": [
+        { "key": "tugas", "label": "Tugas Harian" },
+        { "key": "uh", "label": "Ulangan Harian (UH)" },
+        { "key": "uts", "label": "Ujian Tengah Semester (UTS)" },
+        { "key": "uas", "label": "Ujian Akhir Semester (UAS)" },
+        { "key": "praktikum", "label": "Praktikum / Unjuk Kerja" }
+      ]
+    }
+  }
+  ```
+
+---
+
+### 12. Daftar Tugas & Penilaian Guru (GET `/api/guru/penilaian`)
+Menampilkan daftar tugas/materi yang dibuat oleh guru beserta status pengisian nilainya.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Query Parameters (Opsional)**:
+  * `kelas_id`: Filter ID kelas
+  * `search`: Pencarian nama mapel / bab / judul tugas
+  * `page`: Nomor halaman (Pagination 20 item per page)
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "total": 12,
     "data": [
       {
         "id": 10,
@@ -313,28 +520,30 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
         "mata_pelajaran_id": 3,
         "kode_mapel": "PPLG-WEB",
         "jadwal_pelajaran_id": 5,
-        "bab_materi": "Bab 1 - Dasar HTML & CSS",
-        "judul_tugas": "Tugas 1 - Layout Landing Page",
+        "bab_materi": "Bab 1 - HTML & CSS Base",
+        "judul_tugas": "Tugas 1 - Responsive Layout",
         "jenis": "tugas",
         "jenis_label": "Tugas Harian",
-        "tanggal": "2026-08-03",
-        "tanggal_formatted": "Senin, 03 Agustus 2026",
-        "total_siswa": 32,
-        "sudah_dinilai": 30
+        "tanggal": "2026-08-04",
+        "tanggal_formatted": "Selasa, 04 Agustus 2026",
+        "total_siswa": 36,
+        "sudah_dinilai": 34
       }
     ],
     "pagination": {
       "current_page": 1,
       "last_page": 1,
       "per_page": 20,
-      "total": 5
+      "total": 12
     }
   }
   ```
 
 ---
 
-### 9. Detail & Entri Nilai Siswa (GET `/api/guru/penilaian/{id}`)
+### 13. Detail & Daftar Nilai Siswa per Tugas (GET `/api/guru/penilaian/{id}`)
+Mendapatkan rincian nilai seluruh siswa pada satu tugas/materi tertentu beserta ringkasan statistik (Tuntas, Remidi, Rata-rata).
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
@@ -347,23 +556,19 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
       "guru_id": 2,
       "guru_nama": "Budi Santoso, S.Pd.",
       "mata_pelajaran": "Pemrograman Web",
-      "mata_pelajaran_id": 3,
-      "kode_mapel": "PPLG-WEB",
-      "jadwal_pelajaran_id": 5,
-      "bab_materi": "Bab 1 - Dasar HTML & CSS",
-      "judul_tugas": "Tugas 1 - Layout Landing Page",
+      "bab_materi": "Bab 1 - HTML & CSS Base",
+      "judul_tugas": "Tugas 1 - Responsive Layout",
       "jenis": "tugas",
       "jenis_label": "Tugas Harian",
-      "tanggal": "2026-08-03",
-      "tanggal_formatted": "Senin, 03 Agustus 2026",
-      "keterangan": "Buat layout landing page dengan CSS flexbox",
+      "tanggal": "2026-08-04",
+      "keterangan": "Buat layout flexbox",
       "kkm": 75
     },
     "ringkasan": {
-      "total_siswa": 32,
-      "sudah_dinilai": 30,
-      "tuntas_count": 28,
-      "remidi_count": 2,
+      "total_siswa": 36,
+      "sudah_dinilai": 34,
+      "tuntas_count": 30,
+      "remidi_count": 4,
       "belum_dinilai_count": 2,
       "rata_rata": 84.5
     },
@@ -373,13 +578,13 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
         "siswa_id": 12,
         "nama_siswa": "Ahmad Rizky",
         "nis": "20241001",
-        "foto_url": "https://.../photo.jpg",
+        "foto_url": "http://IP_SERVER:8585/storage/siswa/ahmad.jpg",
         "nilai": 88.5,
         "nilai_formatted": "88.5",
         "kkm": 75,
         "is_tuntas": true,
         "predikat": "B",
-        "catatan_guru": "Bagus, layout sangat rapi",
+        "catatan_guru": "Sangat rapi",
         "status": "Tuntas",
         "status_color": "#10b981"
       }
@@ -389,74 +594,118 @@ Digunakan jika siswa tidak membawa HP/Kartu Pelajar QR Code.
 
 ---
 
-### 10. Buat Tugas / Penilaian Baru (POST `/api/guru/penilaian`)
+### 14. Form Tambah Tugas & Bab Materi Baru (POST `/api/guru/penilaian`)
+Membuat item penilaian/tugas baru dari aplikasi Android (Sesuai dengan form *Tambah Tugas & Bab Materi Baru*). Sistem akan otomatis membuat record nilai awal `0` untuk seluruh siswa di kelas tujuan.
+
 * **Headers**: `Authorization: Bearer <token>`
-* **Request Body**:
+* **Request Body (JSON Payload)**:
   ```json
   {
     "kelas_id": 1,
     "mata_pelajaran_id": 3,
-    "mata_pelajaran": "Pemrograman Web",
-    "bab_materi": "Bab 2 - JavaScript DOM",
-    "judul_tugas": "Tugas 2 - Event Listener",
+    "jadwal_pelajaran_id": 5,
+    "bab_materi": "Bab 1 - Dasar HTML & CSS",
+    "judul_tugas": "Tugas 1 - Membuat Layout Flexbox",
     "jenis": "tugas",
-    "tanggal": "2026-08-03",
-    "keterangan": "Buat fungsi button click event"
+    "tanggal": "2026-08-04",
+    "keterangan": "Petunjuk pengerjaan tugas atau deskripsi materi..."
   }
   ```
+* **Deskripsi Field Input**:
+  * `kelas_id` *(Integer, Wajib)*: ID Kelas Tujuan. (Jika `jadwal_pelajaran_id` diisi, field ini dapat dikosongkan karena akan terisi otomatis).
+  * `mata_pelajaran_id` *(Integer, Opsional)*: ID Mata Pelajaran dari Master Data Mapel.
+  * `jadwal_pelajaran_id` *(Integer, Opsional)*: ID Jadwal Pelajaran Guru. Jika diisi, sistem akan otomatis mengisi `kelas_id` & `mata_pelajaran_id`.
+  * `bab_materi` *(String, Wajib)*: Bab / Topik Materi (Contoh: `"Bab 1 - Dasar HTML & CSS"`).
+  * `judul_tugas` *(String, Wajib)*: Judul Tugas / Evaluasi (Contoh: `"Tugas 1 - Membuat Layout Flexbox"`).
+  * `jenis` *(String, Wajib)*: Jenis Penilaian. Pilihan: `tugas` (Tugas Harian), `uh` (Ulangan Harian), `uts` (UTS), `uas` (UAS), `praktikum` (Praktikum).
+  * `tanggal` *(Date YYYY-MM-DD, Wajib)*: Tanggal Penilaian / Deadline.
+  * `keterangan` *(String, Opsional)*: Catatan / Deskripsi / Petunjuk Pengerjaan Tugas.
+
 * **Response 200 OK**:
   ```json
   {
     "success": true,
     "message": "Tugas/Penilaian berhasil dibuat.",
     "data": {
-      "id": 15,
-      "guru_id": 2,
+      "id": 11,
       "kelas_id": 1,
       "mata_pelajaran_id": 3,
       "mata_pelajaran": "Pemrograman Web",
-      "bab_materi": "Bab 2 - JavaScript DOM",
-      "judul_tugas": "Tugas 2 - Event Listener",
+      "bab_materi": "Bab 1 - Dasar HTML & CSS",
+      "judul_tugas": "Tugas 1 - Membuat Layout Flexbox",
       "jenis": "tugas",
-      "tanggal": "2026-08-03",
-      "keterangan": "Buat fungsi button click event"
+      "tanggal": "2026-08-04",
+      "keterangan": "Petunjuk pengerjaan tugas atau deskripsi materi..."
     }
   }
   ```
 
 ---
 
-### 11. Simpan Batch Nilai Siswa via Mobile (POST `/api/guru/penilaian/{id}/nilai-batch`)
-API ini fleksibel mendukung 2 opsi format data JSON dari aplikasi Android:
+### 15. Edit Data Tugas / Penilaian (PUT `/api/guru/penilaian/{id}`)
+Mengubah rincian data tugas/penilaian yang sudah pernah dibuat.
 
 * **Headers**: `Authorization: Bearer <token>`
-* **Request Body (Opsi A — Recommended for Mobile List App)**:
+* **Request Body**:
+  ```json
+  {
+    "bab_materi": "Bab 1 - Dasar HTML & CSS Grid",
+    "judul_tugas": "Tugas 1 - Membuat Layout CSS Grid",
+    "tanggal": "2026-08-05",
+    "keterangan": "Perubahan petunjuk tugas menggunakan CSS Grid"
+  }
+  ```
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Tugas/Penilaian berhasil diperbarui.",
+    "data": {
+      "id": 11,
+      "judul_tugas": "Tugas 1 - Membuat Layout CSS Grid"
+    }
+  }
+  ```
+
+---
+
+### 16. Hapus Data Tugas / Penilaian (DELETE `/api/guru/penilaian/{id}`)
+Menghapus item tugas/penilaian beserta seluruh data nilai siswa di dalamnya.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "message": "Tugas/Penilaian dan seluruh nilai siswa terkait berhasil dihapus."
+  }
+  ```
+
+---
+
+### 17. Simpan Batch Nilai Siswa (POST `/api/guru/penilaian/{id}/nilai-batch`)
+Menginput/memperbarui nilai seluruh siswa sekaligus dalam 1 request HTTP. Mendukung 2 pilihan format JSON payload (Format List atau Format Keyed Object).
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Opsi Request Body A (Format List Objects)**:
   ```json
   {
     "items": [
-      {
-        "siswa_id": 12,
-        "nilai": 88.5,
-        "catatan_guru": "Sangat rapi"
-      },
-      {
-        "siswa_id": 13,
-        "nilai": 75.0,
-        "catatan_guru": "Cukup baik"
-      }
+      { "siswa_id": 12, "nilai": 88.5, "catatan_guru": "Sangat baik" },
+      { "nilai_id": 102, "nilai": 70.0, "catatan_guru": "Perlu remidi flexbox" }
     ]
   }
   ```
-* **Request Body (Opsi B — Keyed Dictionary Map)**:
+* **Opsi Request Body B (Format Keyed Dictionary)**:
   ```json
   {
     "nilai": {
       "101": 88.5,
-      "102": 75.0
+      "102": 70.0
     },
     "catatan_guru": {
-      "101": "Sangat rapi",
-      "102": "Perlu diperbaiki CSS flexbox"
+      "101": "Sangat baik",
+      "102": "Perlu remidi flexbox"
     }
   }
   ```
@@ -468,12 +717,14 @@ API ini fleksibel mendukung 2 opsi format data JSON dari aplikasi Android:
   }
   ```
 
+
 ---
 
-## 4. 🎓 MODUL SISWA (`/api/siswa`)
+## 5. 🎓 MODUL SISWA (`/api/siswa`)
+> **Akses Role**: `siswa`
 
 ### 1. Profil & Display QR Code Siswa (GET `/api/siswa/profile`)
-Fungsi layar utama HP Siswa untuk menampilkan QR Code diri yang siap di-scan guru.
+Layar utama aplikasi Android milik Siswa untuk menampilkan QR Code digital yang siap discan oleh Guru/Wali Kelas.
 
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
@@ -483,9 +734,11 @@ Fungsi layar utama HP Siswa untuk menampilkan QR Code diri yang siap di-scan gur
     "siswa": {
       "id": 12,
       "nis": "20241001",
+      "nisn": "0051234567",
       "nama": "Ahmad Rizky",
-      "foto_url": "https://.../photo.jpg",
+      "foto_url": "http://IP_SERVER:8585/storage/siswa/ahmad.jpg",
       "qr_token": "8f7a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
+      "qr_is_active": true,
       "kelas": {
         "id": 1,
         "nama": "X RPL 1",
@@ -494,30 +747,54 @@ Fungsi layar utama HP Siswa untuk menampilkan QR Code diri yang siap di-scan gur
     },
     "absensi_hari_ini": {
       "status": "hadir",
-      "status_label": "Hadir",
+      "status_label": "Hadir Tepat Waktu",
+      "status_color": "green",
       "jam_scan": "06:55:10",
-      "tanggal": "2026-08-02"
+      "tanggal": "2026-08-04"
     }
   }
   ```
 
 ---
 
-### 2. Riwayat Absensi Siswa (GET `/api/siswa/absensi?bulan=2026-08`)
+### 2. Regenerate / Refresh QR Token (POST `/api/siswa/qr-refresh`)
+Memperbarui string token QR Code siswa jika terjadi kebocoran token atau untuk alasan keamanan.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
   {
     "success": true,
+    "message": "QR Token berhasil diperbarui.",
+    "qr_token": "9x8y7z6a5b4c3d2e1f0g9h8i7j6k5l4m"
+  }
+  ```
+
+---
+
+### 3. Riwayat Absensi Siswa (GET `/api/siswa/absensi`)
+Melihat daftar riwayat kehadiran siswa.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Query Parameter**: `bulan` (opsional, contoh: `bulan=2026-08`, jika kosong default 30 hari terakhir)
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "periode": {
+      "mulai": "2026-08-01",
+      "selesai": "2026-08-31"
+    },
     "riwayat": [
       {
         "id": 101,
-        "tanggal": "2026-08-02",
-        "tanggal_label": "Minggu, 02 Agustus 2026",
+        "tanggal": "2026-08-04",
+        "tanggal_label": "Selasa, 04 Agustus 2026",
         "jam_scan": "06:55:10",
         "status": "hadir",
         "status_label": "Hadir",
-        "status_color": "green"
+        "status_color": "green",
+        "keterangan": "-"
       }
     ]
   }
@@ -525,14 +802,44 @@ Fungsi layar utama HP Siswa untuk menampilkan QR Code diri yang siap di-scan gur
 
 ---
 
-### 3. Pengajuan Izin / Sakit oleh Siswa (POST `/api/siswa/izin-sakit`)
-Siswa mengajukan surat izin/sakit dengan mengunggah foto surat dari HP.
+### 4. Statistik Kehadiran Siswa (GET `/api/siswa/absensi/stats`)
+Mendapatkan rekap akumulasi kehadiran bulan berjalan & keseluruhan tahun ajaran beserta persentase kehadiran (`pct_hadir`).
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Response 200 OK**:
+  ```json
+  {
+    "success": true,
+    "bulan_ini": {
+      "hadir": 4,
+      "terlambat": 0,
+      "izin": 0,
+      "sakit": 0,
+      "alpha": 0
+    },
+    "total": {
+      "hadir": 85,
+      "terlambat": 2,
+      "izin": 1,
+      "sakit": 2,
+      "alpha": 0
+    },
+    "pct_hadir": 96.7,
+    "total_hari": 90
+  }
+  ```
+
+---
+
+### 5. Pengajuan Izin / Sakit (POST `/api/siswa/izin-sakit`)
+Siswa mengajukan permohonan izin/sakit dengan mengunggah foto surat dokter/keterangan dari HP.
 
 * **Headers**: `Authorization: Bearer <token>`, `Content-Type: multipart/form-data`
-* **Form Data**:
+* **Form-Data**:
   * `status`: `sakit` (atau `izin`)
-  * `keterangan`: `Demam tinggi dan berobat ke dokter`
-  * `bukti_foto`: `[File Gambar Surat Dokter]` (Optional)
+  * `keterangan`: `Demam tinggi dan berobat`
+  * `tanggal`: `2026-08-04` (opsional)
+  * `bukti_foto`: `[File Gambar Surat Dokter]` (opsional, mimes: jpeg, png, jpg, max 2MB)
 * **Response 200 OK**:
   ```json
   {
@@ -542,16 +849,16 @@ Siswa mengajukan surat izin/sakit dengan mengunggah foto surat dari HP.
       "id": 110,
       "status": "sakit",
       "status_label": "Sakit",
-      "keterangan": "Demam tinggi (Bukti: storage/izin_sakit/abc.jpg)",
-      "tanggal": "2026-08-02"
+      "keterangan": "Demam tinggi (Bukti: storage/izin_sakit/abcd123.jpg)",
+      "tanggal": "2026-08-04"
     }
   }
   ```
 
 ---
 
-### 4. Jadwal Pelajaran Siswa (GET `/api/siswa/jadwal`)
-Siswa melihat jadwal pelajaran mingguan kelasnya.
+### 6. Jadwal Pelajaran Siswa (GET `/api/siswa/jadwal`)
+Melihat jadwal pelajaran mingguan kelas tempat siswa terdaftar.
 
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
@@ -564,7 +871,7 @@ Siswa melihat jadwal pelajaran mingguan kelasnya.
         "hari": "Senin",
         "jam": "07:15 - 08:45",
         "mata_pelajaran": "Pemrograman Web",
-        "kode_mapel": "MP-PWPB-X",
+        "kode_mapel": "PPLG-WEB",
         "guru": "Budi Santoso, S.Pd.",
         "ruangan": "Lab Komputer 1"
       }
@@ -574,14 +881,14 @@ Siswa melihat jadwal pelajaran mingguan kelasnya.
 
 ---
 
-### 5. Nilai & Evaluasi Harian Siswa (GET `/api/siswa/nilai`)
-Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/feedback dari guru.
+### 7. Nilai & Evaluasi Harian Siswa (GET `/api/siswa/nilai`)
+Melihat daftar nilai tugas, materi, ulangan harian, beserta catatan/feedback guru dan statistik nilai pribadi siswa.
 
 * **Headers**: `Authorization: Bearer <token>`
 * **Query Parameters (Opsional)**:
-  * `search`: `Pemrograman` (mencari berdasarkan nama mapel, bab materi, atau judul tugas)
-  * `jenis`: `uh` (pilihan: `tugas`, `uh`, `uts`, `uas`, `praktikum`)
-  * `mapel_id`: `3` (filter spesifik ID mata pelajaran)
+  * `search`: Cari nama mapel / bab / judul tugas
+  * `jenis`: Filter jenis (`tugas`, `uh`, `uts`, `uas`, `praktikum`)
+  * `mapel_id`: Filter ID spesifik mata pelajaran
 * **Response 200 OK**:
   ```json
   {
@@ -604,12 +911,12 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
         "mata_pelajaran": "Pemrograman Web",
         "kode_mapel": "PPLG-WEB",
         "guru_nama": "Budi Santoso, S.Pd.",
-        "bab_materi": "Bab 1 - Dasar HTML & CSS",
-        "judul_tugas": "Tugas 1 - Layout Landing Page",
+        "bab_materi": "Bab 1 - HTML & CSS Base",
+        "judul_tugas": "Tugas 1 - Responsive Layout",
         "jenis": "tugas",
         "jenis_label": "Tugas Harian",
-        "tanggal": "2026-08-03",
-        "tanggal_formatted": "Senin, 03 Agustus 2026",
+        "tanggal": "2026-08-04",
+        "tanggal_formatted": "Selasa, 04 Agustus 2026",
         "nilai": 88.5,
         "nilai_formatted": "88.5",
         "kkm": 75,
@@ -617,7 +924,7 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
         "predikat": "B",
         "status": "Tuntas",
         "status_color": "#10b981",
-        "catatan_guru": "Sangat rapi, struktur HTML valid"
+        "catatan_guru": "Sangat baik"
       }
     ]
   }
@@ -625,9 +932,12 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
 
 ---
 
-## 5. 🛠️ MODUL ADMIN / SUPER ADMIN (`/api/admin`)
+## 6. 🛠️ MODUL ADMIN (`/api/admin`)
+> **Akses Role**: `admin`, `super_admin`
 
 ### 1. Executive Dashboard Admin (GET `/api/admin/dashboard`)
+Statistik global sekolah, grafik 7 hari, breakdown per kelas, dan status WhatsApp Gateway.
+
 * **Headers**: `Authorization: Bearer <token>`
 * **Response 200 OK**:
   ```json
@@ -636,29 +946,29 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
     "tanggal": "Selasa, 04 Agustus 2026",
     "ringkasan": {
       "total_siswa": 720,
-      "total_guru": 35,
+      "total_guru": 45,
       "total_kelas": 24,
-      "total_mapel": 18,
+      "total_mapel": 30,
       "hadir": 680,
       "terlambat": 25,
       "izin": 5,
       "sakit": 3,
       "alpha": 7,
       "belum_absen": 0,
-      "wa_active": 1,
-      "wa_total": 1
+      "wa_active": 2,
+      "wa_total": 2
     },
     "per_kelas": [
       {
         "id": 1,
-        "nama": "XII RPL 1",
+        "nama": "X RPL 1",
         "jurusan": "Rekayasa Perangkat Lunak",
         "total": 36,
         "hadir": 34,
         "terlambat": 2,
         "alpha": 0,
-        "izin": 0,
-        "sakit": 0,
+        "izin": 1,
+        "sakit": 1,
         "belum": 0
       }
     ],
@@ -676,159 +986,160 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
 
 ---
 
-### 2. Kelola Data Siswa (`/api/admin/siswa`)
-* **Daftar Siswa (GET `/api/admin/siswa?search=budi&kelas_id=1`)**:
+### 2. Rekap Absensi Global Sekolah (`GET /api/admin/absensi/rekap`)
+Monitoring rekapitulasi kehadiran seluruh siswa sekolah per tanggal.
+
+* **Headers**: `Authorization: Bearer <token>`
+* **Query Parameters (Opsional)**: `tanggal=YYYY-MM-DD`, `kelas_id=1`, `status=hadir`
+* **Response 200 OK**:
   ```json
   {
     "success": true,
+    "tanggal": "2026-08-04",
+    "tanggal_label": "Selasa, 04 Agustus 2026",
     "total": 720,
     "data": [
       {
-        "id": 12,
-        "nis": "20241001",
-        "nisn": "0051234567",
+        "id": 101,
+        "siswa_id": 12,
         "nama": "Ahmad Rizky",
-        "foto_url": "https://.../photo.jpg",
-        "kelas_id": 1,
-        "kelas": "XII RPL 1",
-        "jurusan": "Rekayasa Perangkat Lunak",
-        "nama_ortu": "Bambang Rizky",
-        "no_wa_ortu": "081987654321",
-        "qr_token": "8f7a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
-        "qr_is_active": true
+        "nis": "20241001",
+        "kelas": "X RPL 1",
+        "status": "hadir",
+        "status_label": "Hadir",
+        "status_color": "green",
+        "jam_scan": "06:55:10",
+        "keterangan": "-"
       }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "last_page": 36,
-      "per_page": 20,
-      "total": 720
+    ]
+  }
+  ```
+
+---
+
+### 3. CRUD Data Siswa (`/api/admin/siswa`)
+
+* **List Siswa**: `GET /api/admin/siswa?search=...&kelas_id=...&page=1`
+* **Detail Siswa**: `GET /api/admin/siswa/{id}`
+* **Tambah Siswa**: `POST /api/admin/siswa`
+  * **Body**:
+    ```json
+    {
+      "kelas_id": 1,
+      "nis": "20241099",
+      "nisn": "0059999999",
+      "nama": "Siswa Baru",
+      "nama_ortu": "Bapak Siswa",
+      "no_wa_ortu": "628123456789"
     }
-  }
-  ```
-* **Tambah Siswa Baru (POST `/api/admin/siswa`)**:
-  * Request Body: `{"kelas_id": 1, "nis": "20241005", "nama": "Dewi Sartika", "nama_ortu": "Suharto", "no_wa_ortu": "081234567890"}`
-* **Update Siswa (PUT `/api/admin/siswa/{id}`)**:
-  * Request Body: `{"kelas_id": 1, "nis": "20241005", "nama": "Dewi Sartika, S.T.", "no_wa_ortu": "081234567890"}`
-* **Hapus Siswa (DELETE `/api/admin/siswa/{id}`)**
+    ```
+* **Update Siswa**: `PUT /api/admin/siswa/{id}`
+* **Hapus Siswa**: `DELETE /api/admin/siswa/{id}`
 
 ---
 
-### 3. Kelola Data Guru (`/api/admin/guru`)
-* **Daftar Guru (GET `/api/admin/guru?search=budi`)**:
-  ```json
-  {
-    "success": true,
-    "data": [
-      {
-        "id": 2,
-        "nip": "198501012010011001",
-        "nama": "Budi Santoso, S.Pd.",
-        "no_hp": "081234567890",
-        "foto_url": "https://.../budi.jpg",
-        "wali_kelas": "XII RPL 1"
-      }
-    ]
-  }
-  ```
-* **Tambah Guru Baru (POST `/api/admin/guru`)**:
-  * Request Body: `{"nama": "Budi Santoso", "nip": "19850101...", "no_hp": "0812...", "email": "guru2@sekolah.com", "password": "password123"}`
-* **Update Guru (PUT `/api/admin/guru/{id}`)**
-* **Hapus Guru (DELETE `/api/admin/guru/{id}`)**
+### 4. CRUD Data Guru (`/api/admin/guru`)
 
----
-
-### 4. Kelola Data Kelas (`/api/admin/kelas`)
-* **Daftar Kelas (GET `/api/admin/kelas`)**:
-  ```json
-  {
-    "success": true,
-    "data": [
-      {
-        "id": 1,
-        "nama": "XII RPL 1",
-        "jurusan": "Rekayasa Perangkat Lunak",
-        "wali_kelas": "Budi Santoso, S.Pd.",
-        "total_siswa": 36
-      }
-    ]
-  }
-  ```
-* **Tambah Kelas (POST `/api/admin/kelas`)**: `{"nama": "XII RPL 2", "jurusan_id": 1, "wali_kelas_id": 2}`
-
----
-
-### 5. WA Sender & WA Logs (`/api/admin/wa-sender` & `/api/admin/wa-logs`)
-* **Status Device WA Sender (GET `/api/admin/wa-sender`)**:
-  ```json
-  {
-    "success": true,
-    "data": [
-      {
-        "id": 1,
-        "name": "WA Official Sekolah",
-        "phone": "6281234567890",
-        "status": "aktif",
-        "status_color": "#22c55e",
-        "kelas_count": 5
-      }
-    ]
-  }
-  ```
-* **Log Pengiriman WA (GET `/api/admin/wa-logs?search=...`)**:
-  ```json
-  {
-    "success": true,
-    "total": 150,
-    "data": [
-      {
-        "id": 1,
-        "recipient": "081987654321",
-        "siswa_nama": "Ahmad Rizky",
-        "pesan": "Absensi BERHASIL! Ahmad Rizky tercatat HADIR (Jam 06:55:10)",
-        "status": "terkirim",
-        "created_at": "2026-08-04 06:55:10",
-        "created_at_label": "10 menit yang lalu"
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "last_page": 8,
-      "per_page": 20,
-      "total": 150
+* **List Guru**: `GET /api/admin/guru?search=...`
+* **Tambah Guru**: `POST /api/admin/guru` (Otomatis membuat akun User & assign role `guru`)
+  * **Body**:
+    ```json
+    {
+      "nama": "Guru Baru, S.Kom.",
+      "nip": "199001012020011002",
+      "no_hp": "6281987654321",
+      "email": "gurubaru@sekolah.sch.id",
+      "password": "password123"
     }
-  }
-  ```
+    ```
+* **Update Guru**: `PUT /api/admin/guru/{id}`
+* **Hapus Guru**: `DELETE /api/admin/guru/{id}`
 
 ---
 
-### 6. Pengaturan Jam Absensi Sekolah (`/api/admin/pengaturan-absensi`)
-* **Get Pengaturan (GET `/api/admin/pengaturan-absensi`)**:
-  ```json
-  {
-    "success": true,
-    "data": {
-      "id": 1,
+### 5. CRUD Data Kelas & Jurusan (`/api/admin/kelas` & `/api/admin/jurusan`)
+
+* **List Kelas**: `GET /api/admin/kelas`
+* **Tambah Kelas**: `POST /api/admin/kelas`
+  * **Body**: `{"nama": "XII RPL 2", "jurusan_id": 1, "wali_kelas_id": 2}`
+* **Update Kelas**: `PUT /api/admin/kelas/{id}`
+* **Hapus Kelas**: `DELETE /api/admin/kelas/{id}`
+* **List Jurusan**: `GET /api/admin/jurusan`
+* **Tambah Jurusan**: `POST /api/admin/jurusan` (`{"kode": "RPL", "nama": "Rekayasa Perangkat Lunak"}`)
+
+---
+
+### 6. CRUD WA Gateway Sender & Logs (`/api/admin/wa-*`)
+
+* **List WA Sender**: `GET /api/admin/wa-sender`
+* **Tambah WA Device**: `POST /api/admin/wa-sender`
+  * **Body**: `{"name": "WA Utama", "phone": "628123456789", "status": "aktif"}`
+* **Update WA Device**: `PUT /api/admin/wa-sender/{id}`
+* **Hapus WA Device**: `DELETE /api/admin/wa-sender/{id}`
+* **Log Pengiriman WA**: `GET /api/admin/wa-logs?search=...&page=1`
+
+---
+
+### 7. CRUD User Management (`/api/admin/users`)
+
+* **List User**: `GET /api/admin/users?search=...&role=...&page=1`
+* **Tambah User**: `POST /api/admin/users`
+  * **Body**: `{"name": "User Admin Baru", "email": "admin2@sekolah.sch.id", "password": "password123", "role": "admin"}`
+* **Update User**: `PUT /api/admin/users/{id}`
+* **Hapus User**: `DELETE /api/admin/users/{id}`
+
+---
+
+### 8. CRUD Master Mapel (`/api/admin/mapel`)
+
+* **List Mapel**: `GET /api/admin/mapel`
+* **Tambah Mapel**: `POST /api/admin/mapel` (`{"kode": "PPLG-01", "nama": "Pemrograman Web", "kelompok": "produktif"}`)
+* **Update Mapel**: `PUT /api/admin/mapel/{id}`
+* **Hapus Mapel**: `DELETE /api/admin/mapel/{id}`
+
+---
+
+### 9. CRUD Master Jadwal Pelajaran (`/api/admin/jadwal`)
+
+* **List Jadwal**: `GET /api/admin/jadwal?kelas_id=...&hari=...`
+* **Tambah Jadwal**: `POST /api/admin/jadwal`
+  * **Body**: `{"kelas_id": 1, "mata_pelajaran_id": 3, "guru_id": 2, "hari": "senin", "jam_mulai": "07:15", "jam_selesai": "08:45", "ruangan": "Lab 1"}`
+* **Update Jadwal**: `PUT /api/admin/jadwal/{id}`
+* **Hapus Jadwal**: `DELETE /api/admin/jadwal/{id}`
+
+---
+
+### 10. Pengaturan Jam Absensi Sekolah (`/api/admin/pengaturan-absensi`)
+
+* **Get Pengaturan**: `GET /api/admin/pengaturan-absensi`
+* **Update Pengaturan**: `POST /api/admin/pengaturan-absensi`
+  * **Body**:
+    ```json
+    {
       "jam_masuk_batas": "07:00:00",
       "jam_absensi_tutup": "12:00:00",
       "aktif_sabtu": false
     }
-  }
-  ```
-* **Update Pengaturan Jam (POST `/api/admin/pengaturan-absensi`)**:
-  * Request Body: `{"jam_masuk_batas": "07:15:00", "jam_absensi_tutup": "12:00:00", "aktif_sabtu": false}`
+    ```
+
 
 ---
 
-## 6. ⚠️ FORMAT RESPONSE & ERROR HANDLING
+## 7. ⚠️ FORMAT ERROR & STATUS CODE
 
-* **Error 401 (Unauthorized / Token Expired)**:
+Aplikasi Android disarankan menangani kode HTTP status standar berikut:
+
+* **200 OK**: Request berhasil.
+* **201 Created**: Data berhasil dibuat.
+* **401 Unauthorized**: Bearer Token kadaluarsa, salah, atau tidak disertakan.
   ```json
   {
     "message": "Unauthenticated."
   }
   ```
-* **Error 422 (Validation Error)**:
+* **403 Forbidden**: Akun tidak memiliki hak akses role (misal siswa mencoba akses rute guru/admin).
+* **404 Not Found**: Data atau endpoint tidak ditemukan.
+* **422 Unprocessable Entity**: Validation Error dari input user.
   ```json
   {
     "message": "The given data was invalid.",
@@ -838,57 +1149,61 @@ Siswa melihat daftar nilai tugas, bab materi, ulangan, beserta rincian catatan/f
     }
   }
   ```
+* **500 Internal Server Error**: Fatal exception server backend.
 
 ---
 
-## 7. 💻 CONTOH IMPLEMENTASI CLIENT ANDROID (KOTLIN + RETROFIT)
+## 8. 💻 CONTOH CODE CLIENT ANDROID (KOTLIN + RETROFIT)
 
-Berikut adalah draf contoh implementasi API Client di Kotlin untuk aplikasi Android:
+Berikut contoh implementasi Retrofit Client pada aplikasi Android Native (Kotlin):
 
+### 1. Interface `ApiService.kt`
 ```kotlin
-// ApiService.kt
 import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
 
+    // Auth
     @POST("api/auth/login")
     suspend fun login(
         @Body request: LoginRequest
     ): Response<LoginResponse>
 
-    @GET("api/guru/kelas")
-    suspend fun getKelasGuru(
+    @GET("api/auth/me")
+    suspend fun getProfile(
         @Header("Authorization") token: String
-    ): Response<KelasListResponse>
+    ): Response<ProfileResponse>
 
+    // Guru Scan QR
     @POST("api/guru/absensi/scan")
     suspend fun scanQr(
         @Header("Authorization") token: String,
         @Body request: ScanQrRequest
     ): Response<ScanQrResponse>
-}
 
-// Data Models
+    // Siswa Display Profile
+    @GET("api/siswa/profile")
+    suspend fun getSiswaProfile(
+        @Header("Authorization") token: String
+    ): Response<SiswaProfileResponse>
+}
+```
+
+### 2. Request Data Models
+```kotlin
 data class LoginRequest(
     val email: String,
     val password: String,
-    val device_name: String = "Android Phone"
+    val device_name: String = "Android Mobile App"
 )
 
 data class ScanQrRequest(
     val qr_token: String,
     val kelas_id: Int
 )
-
-data class ScanQrResponse(
-    val success: Boolean,
-    val message: String,
-    val siswa: SiswaData?,
-    val absensi: AbsensiData?
-)
 ```
 
 ---
 
-*Dokumentasi API Android — Developed by **qpawdeveloper**.*
+*Dokumentasi API Android Sistem Absensi MHC — Developed by **qpawdeveloper**.*

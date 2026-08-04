@@ -62,9 +62,13 @@ Route::withoutMiddleware([
             Route::put('absensi/{id}',             [GuruApiController::class, 'updateAbsensi']);
             Route::delete('absensi/{id}',          [GuruApiController::class, 'deleteAbsensi']);
             Route::get('jadwal',                   [GuruApiController::class, 'jadwal']);
+            Route::get('mapel',                    [GuruApiController::class, 'mapelList']);
+            Route::get('penilaian/options',        [GuruApiController::class, 'penilaianOptions']);
             Route::get('penilaian',                [GuruApiController::class, 'penilaianList']);
             Route::get('penilaian/{id}',           [GuruApiController::class, 'penilaianDetail']);
             Route::post('penilaian',               [GuruApiController::class, 'penilaianStore']);
+            Route::put('penilaian/{id}',            [GuruApiController::class, 'penilaianUpdate']);
+            Route::delete('penilaian/{id}',         [GuruApiController::class, 'penilaianDestroy']);
             Route::post('penilaian/{id}/nilai-batch', [GuruApiController::class, 'penilaianNilaiBatch']);
         });
 
@@ -82,6 +86,9 @@ Route::withoutMiddleware([
         // ── Admin / Super Admin ────────────────────────────────────────────────
         Route::middleware('role:admin|super_admin')->prefix('admin')->group(function () {
             Route::get('dashboard',          [AdminApiController::class, 'dashboard']);
+
+            // Rekap Absensi Global Admin
+            Route::get('absensi/rekap',      [AdminApiController::class, 'absensiRekap']);
             
             // Siswa Suite
             Route::get('siswa',              [AdminApiController::class, 'siswaList']);
@@ -99,16 +106,37 @@ Route::withoutMiddleware([
             // Kelas Suite
             Route::get('kelas',              [AdminApiController::class, 'kelasList']);
             Route::post('kelas',             [AdminApiController::class, 'kelasStore']);
+            Route::put('kelas/{id}',         [AdminApiController::class, 'kelasUpdate']);
+            Route::delete('kelas/{id}',      [AdminApiController::class, 'kelasDestroy']);
+
+            // Jurusan Suite
+            Route::get('jurusan',            [AdminApiController::class, 'jurusanList']);
+            Route::post('jurusan',           [AdminApiController::class, 'jurusanStore']);
 
             // WA Sender & Logs
             Route::get('wa-sender',          [AdminApiController::class, 'waSenderList']);
+            Route::post('wa-sender',         [AdminApiController::class, 'waSenderStore']);
+            Route::put('wa-sender/{id}',     [AdminApiController::class, 'waSenderUpdate']);
+            Route::delete('wa-sender/{id}',  [AdminApiController::class, 'waSenderDestroy']);
             Route::get('wa-logs',            [AdminApiController::class, 'waLogsList']);
 
-            // Users, Mapel, & Jadwal
+            // Users Management
             Route::get('users',              [AdminApiController::class, 'userList']);
+            Route::post('users',             [AdminApiController::class, 'userStore']);
+            Route::put('users/{id}',         [AdminApiController::class, 'userUpdate']);
+            Route::delete('users/{id}',      [AdminApiController::class, 'userDestroy']);
+
+            // Master Mapel
             Route::get('mapel',              [AdminApiController::class, 'mapelList']);
             Route::post('mapel',             [AdminApiController::class, 'mapelStore']);
+            Route::put('mapel/{id}',         [AdminApiController::class, 'mapelUpdate']);
+            Route::delete('mapel/{id}',      [AdminApiController::class, 'mapelDestroy']);
+
+            // Master Jadwal
             Route::get('jadwal',             [AdminApiController::class, 'jadwalList']);
+            Route::post('jadwal',            [AdminApiController::class, 'jadwalStore']);
+            Route::put('jadwal/{id}',        [AdminApiController::class, 'jadwalUpdate']);
+            Route::delete('jadwal/{id}',     [AdminApiController::class, 'jadwalDestroy']);
 
             // Pengaturan Jam Absensi Sekolah
             Route::get('pengaturan-absensi', [AdminApiController::class, 'pengaturanAbsensi']);
